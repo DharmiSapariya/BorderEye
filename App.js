@@ -1,0 +1,89 @@
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { StatusBar } from 'expo-status-bar';
+import { RobotProvider } from './src/context/RobotContext';
+import { colors } from './src/utils/colors';
+
+// Screens
+import { AlertsScreen } from './src/screens/AlertsScreen';
+import { AnalyticsScreen } from './src/screens/AnalyticsScreen';
+import { ConnectionScreen } from './src/screens/ConnectionScreen';
+import { DashboardScreen } from './src/screens/DashboardScreen';
+import { SettingsScreen } from './src/screens/SettingsScreen';
+
+const Stack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator();
+
+// Main tabs after connection
+function MainTabs() {
+  return (
+    <Tab.Navigator
+      screenOptions={{
+        headerShown: false,
+        tabBarStyle: {
+          backgroundColor: colors.backgroundLight,
+          borderTopWidth: 1,
+          borderTopColor: 'rgba(255,255,255,0.1)',
+          paddingBottom: 5,
+          paddingTop: 5,
+          height: 60,
+        },
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textDim,
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontWeight: '600',
+        },
+      }}
+    >
+      <Tab.Screen
+        name="Dashboard"
+        component={DashboardScreen}
+        options={{
+          tabBarIcon: ({ color }) => <span style={{ fontSize: 24 }}>🏠</span>,
+        }}
+      />
+      <Tab.Screen
+        name="Alerts"
+        component={AlertsScreen}
+        options={{
+          tabBarIcon: ({ color }) => <span style={{ fontSize: 24 }}>🚨</span>,
+        }}
+      />
+      <Tab.Screen
+        name="Analytics"
+        component={AnalyticsScreen}
+        options={{
+          tabBarIcon: ({ color }) => <span style={{ fontSize: 24 }}>📊</span>,
+        }}
+      />
+      <Tab.Screen
+        name="Settings"
+        component={SettingsScreen}
+        options={{
+          tabBarIcon: ({ color }) => <span style={{ fontSize: 24 }}>⚙️</span>,
+        }}
+      />
+    </Tab.Navigator>
+  );
+}
+
+export default function App() {
+  return (
+    <RobotProvider>
+      <NavigationContainer>
+        <StatusBar style="light" />
+        <Stack.Navigator
+          screenOptions={{
+            headerShown: false,
+            contentStyle: { backgroundColor: colors.background },
+          }}
+        >
+          <Stack.Screen name="Connection" component={ConnectionScreen} />
+          <Stack.Screen name="Main" component={MainTabs} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </RobotProvider>
+  );
+}
