@@ -1,4 +1,6 @@
+import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { MotiView } from 'moti';
 import { useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useRobot } from '../context/RobotContext';
@@ -35,18 +37,27 @@ export const ConnectionScreen = ({ navigation }) => {
     setConnecting(false);
   };
 
-  const renderDevice = ({ item }) => (
-    <TouchableOpacity
-      style={styles.deviceCard}
-      onPress={() => handleConnect(item)}
-      disabled={connecting}
+  const renderDevice = ({ item, index }) => (
+    <MotiView
+      from={{ opacity: 0, translateY: 10 }}
+      animate={{ opacity: 1, translateY: 0 }}
+      transition={{ type: 'timing', duration: 300, delay: index * 60 }}
     >
-      <View style={styles.deviceInfo}>
-        <Text style={styles.deviceName}>{item.name}</Text>
-        <Text style={styles.deviceAddress}>{item.address}</Text>
-      </View>
-      <Text style={styles.arrow}>→</Text>
-    </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.deviceCard}
+        onPress={() => handleConnect(item)}
+        disabled={connecting}
+      >
+        <View style={styles.deviceIconWrap}>
+          <Ionicons name="hardware-chip-outline" size={20} color={colors.primary} />
+        </View>
+        <View style={styles.deviceInfo}>
+          <Text style={styles.deviceName}>{item.name}</Text>
+          <Text style={styles.deviceAddress}>{item.address}</Text>
+        </View>
+        <Ionicons name="chevron-forward" size={20} color={colors.primary} />
+      </TouchableOpacity>
+    </MotiView>
   );
 
   return (
@@ -54,10 +65,20 @@ export const ConnectionScreen = ({ navigation }) => {
       colors={[colors.background, colors.backgroundLight]}
       style={styles.container}
     >
-      <View style={styles.header}>
-        <Text style={styles.title}>🤖 BorderEye Monitor</Text>
+      <MotiView
+        style={styles.header}
+        from={{ opacity: 0, translateY: -8 }}
+        animate={{ opacity: 1, translateY: 0 }}
+        transition={{ type: 'timing', duration: 350 }}
+      >
+        <View style={styles.brandRow}>
+          <View style={styles.brandIconWrap}>
+            <Ionicons name="shield-checkmark" size={26} color={colors.primary} />
+          </View>
+          <Text style={styles.title}>BorderEye Monitor</Text>
+        </View>
         <Text style={styles.subtitle}>Connect to your robot</Text>
-      </View>
+      </MotiView>
 
       <View style={styles.content}>
         <TouchableOpacity
@@ -101,11 +122,18 @@ export const ConnectionScreen = ({ navigation }) => {
         )}
 
         {devices.length === 0 && !scanning && (
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyIcon}>📡</Text>
+          <MotiView
+            style={styles.emptyState}
+            from={{ opacity: 0, scale: 0.94 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ type: 'timing', duration: 400 }}
+          >
+            <View style={styles.emptyIconWrap}>
+              <Ionicons name="wifi-outline" size={40} color={colors.textDim} />
+            </View>
             <Text style={styles.emptyText}>No bridge server found</Text>
             <Text style={styles.emptySubtext}>Make sure bridge server is running on your computer and both devices are on same WiFi</Text>
-          </View>
+          </MotiView>
         )}
       </View>
     </LinearGradient>
@@ -121,11 +149,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingBottom: 24,
   },
+  brandRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  brandIconWrap: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: colors.primary + '1F',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
   title: {
-    fontSize: 32,
+    fontSize: 26,
     fontWeight: 'bold',
     color: colors.text,
-    marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
@@ -176,11 +217,19 @@ const styles = StyleSheet.create({
   deviceCard: {
     backgroundColor: colors.surface,
     padding: 16,
-    borderRadius: 12,
+    borderRadius: 14,
     marginBottom: 12,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+  },
+  deviceIconWrap: {
+    width: 38,
+    height: 38,
+    borderRadius: 10,
+    backgroundColor: colors.primary + '1F',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
   },
   deviceInfo: {
     flex: 1,
@@ -195,18 +244,19 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.textSecondary,
   },
-  arrow: {
-    fontSize: 24,
-    color: colors.primary,
-  },
   emptyState: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  emptyIcon: {
-    fontSize: 64,
-    marginBottom: 16,
+  emptyIconWrap: {
+    width: 84,
+    height: 84,
+    borderRadius: 42,
+    backgroundColor: colors.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
   },
   emptyText: {
     fontSize: 18,

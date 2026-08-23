@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -24,10 +25,10 @@ function MainTabs() {
         tabBarStyle: {
           backgroundColor: colors.backgroundLight,
           borderTopWidth: 1,
-          borderTopColor: 'rgba(255,255,255,0.1)',
-          paddingBottom: 5,
-          paddingTop: 5,
-          height: 60,
+          borderTopColor: 'rgba(255,255,255,0.08)',
+          paddingBottom: 6,
+          paddingTop: 8,
+          height: 64,
         },
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textDim,
@@ -41,28 +42,36 @@ function MainTabs() {
         name="Dashboard"
         component={DashboardScreen}
         options={{
-          tabBarIcon: ({ color }) => <span style={{ fontSize: 24 }}>🏠</span>,
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'home' : 'home-outline'} size={22} color={color} />
+          ),
         }}
       />
       <Tab.Screen
         name="Alerts"
         component={AlertsScreen}
         options={{
-          tabBarIcon: ({ color }) => <span style={{ fontSize: 24 }}>🚨</span>,
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'warning' : 'warning-outline'} size={22} color={color} />
+          ),
         }}
       />
       <Tab.Screen
         name="Analytics"
         component={AnalyticsScreen}
         options={{
-          tabBarIcon: ({ color }) => <span style={{ fontSize: 24 }}>📊</span>,
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'stats-chart' : 'stats-chart-outline'} size={22} color={color} />
+          ),
         }}
       />
       <Tab.Screen
         name="Settings"
         component={SettingsScreen}
         options={{
-          tabBarIcon: ({ color }) => <span style={{ fontSize: 24 }}>⚙️</span>,
+          tabBarIcon: ({ color, focused }) => (
+            <Ionicons name={focused ? 'settings' : 'settings-outline'} size={22} color={color} />
+          ),
         }}
       />
     </Tab.Navigator>

@@ -1,3 +1,4 @@
+import { MotiView } from 'moti';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { ConnectionBadge } from '../components/ConnectionBadge';
 import { RobotStatus } from '../components/RobotStatus';
@@ -53,35 +54,39 @@ export const DashboardScreen = () => {
 
         <View style={styles.sensorGrid}>
           <SensorCard
+            index={0}
             title="Temperature"
             value={sensorData?.temperature?.toFixed(1)}
             unit="°C"
-            icon="🌡️"
+            icon="thermometer"
             gradient={colors.gradients.orange}
           />
-          
+
           <SensorCard
+            index={1}
             title="Humidity"
             value={sensorData?.humidity?.toFixed(0)}
             unit="%"
-            icon="💧"
+            icon="water-percent"
             gradient={colors.gradients.blue}
           />
-          
+
           <SensorCard
+            index={2}
             title="Air Quality"
             value={sensorData?.gas}
             unit=""
-            icon="💨"
+            icon="weather-windy"
             gradient={colors.gradients.purple}
             status={getGasStatus(sensorData?.gas)}
           />
-          
+
           <SensorCard
+            index={3}
             title="Distance"
             value={sensorData?.distance}
             unit="cm"
-            icon="📏"
+            icon="radar"
             gradient={colors.gradients.green}
             status={getDistanceStatus(sensorData?.distance)}
           />
@@ -89,32 +94,40 @@ export const DashboardScreen = () => {
 
         <View style={styles.metalCard}>
           <SensorCard
+            index={4}
             title="Metal Detection"
             value={sensorData?.metal === 0 ? 'DETECTED' : 'None'}
             unit=""
-            icon="🔩"
+            icon="magnet"
             gradient={colors.gradients.red}
             status={getMetalStatus(sensorData?.metal)}
           />
         </View>
 
-        <View style={styles.statsContainer}>
+        <MotiView
+          style={styles.statsContainer}
+          from={{ opacity: 0, translateY: 14 }}
+          animate={{ opacity: 1, translateY: 0 }}
+          transition={{ type: 'timing', duration: 380, delay: 5 * 70 }}
+        >
           <Text style={styles.statsTitle}>Quick Stats</Text>
           <View style={styles.statsGrid}>
             <View style={styles.statCard}>
               <Text style={styles.statValue}>{uptime}</Text>
               <Text style={styles.statLabel}>Uptime</Text>
             </View>
+            <View style={styles.statDivider} />
             <View style={styles.statCard}>
               <Text style={styles.statValue}>{stats.obstaclesAvoided}</Text>
               <Text style={styles.statLabel}>Obstacles</Text>
             </View>
+            <View style={styles.statDivider} />
             <View style={styles.statCard}>
               <Text style={styles.statValue}>{stats.alertsTriggered}</Text>
               <Text style={styles.statLabel}>Alerts</Text>
             </View>
           </View>
-        </View>
+        </MotiView>
       </ScrollView>
     </View>
   );
@@ -126,16 +139,19 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   header: {
-    paddingTop: 50,
-    paddingHorizontal: 16,
-    paddingBottom: 16,
+    paddingTop: 56,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
     backgroundColor: colors.backgroundLight,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
   },
   title: {
     fontSize: 28,
     fontWeight: 'bold',
     color: colors.text,
-    marginBottom: 8,
+    marginBottom: 10,
+    letterSpacing: 0.2,
   },
   content: {
     flex: 1,
@@ -150,22 +166,38 @@ const styles = StyleSheet.create({
   },
   statsContainer: {
     margin: 16,
-    padding: 16,
+    marginTop: 8,
+    marginBottom: 28,
+    padding: 20,
     backgroundColor: colors.surface,
-    borderRadius: 12,
+    borderRadius: 18,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 2,
   },
   statsTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '600',
-    color: colors.text,
-    marginBottom: 12,
+    color: colors.textSecondary,
+    marginBottom: 16,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   statsGrid: {
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-around',
+  },
+  statDivider: {
+    width: 1,
+    height: 32,
+    backgroundColor: 'rgba(255,255,255,0.08)',
   },
   statCard: {
     alignItems: 'center',
+    flex: 1,
   },
   statValue: {
     fontSize: 24,

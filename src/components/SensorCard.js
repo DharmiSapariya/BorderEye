@@ -1,11 +1,17 @@
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { MotiView } from 'moti';
 import { StyleSheet, Text, View } from 'react-native';
-import { Card } from 'react-native-paper';
 import { colors } from '../utils/colors';
 
-export const SensorCard = ({ title, value, unit, icon, gradient, status }) => {
+export const SensorCard = ({ title, value, unit, icon, gradient, status, index = 0 }) => {
   return (
-    <Card style={styles.card}>
+    <MotiView
+      style={styles.card}
+      from={{ opacity: 0, translateY: 14, scale: 0.96 }}
+      animate={{ opacity: 1, translateY: 0, scale: 1 }}
+      transition={{ type: 'timing', duration: 380, delay: index * 70 }}
+    >
       <LinearGradient
         colors={gradient || colors.gradients.blue}
         style={styles.gradient}
@@ -13,7 +19,9 @@ export const SensorCard = ({ title, value, unit, icon, gradient, status }) => {
         end={{ x: 1, y: 1 }}
       >
         <View style={styles.content}>
-          <Text style={styles.icon}>{icon}</Text>
+          <View style={styles.iconWrap}>
+            <MaterialCommunityIcons name={icon} size={22} color="#FFFFFF" />
+          </View>
           <Text style={styles.title}>{title}</Text>
           <Text style={styles.value}>
             {value !== null && value !== undefined ? value : '--'}
@@ -29,18 +37,22 @@ export const SensorCard = ({ title, value, unit, icon, gradient, status }) => {
           )}
         </View>
       </LinearGradient>
-    </Card>
+    </MotiView>
   );
 };
 
 const styles = StyleSheet.create({
   card: {
     margin: 8,
-    borderRadius: 16,
-    elevation: 4,
+    borderRadius: 18,
     overflow: 'hidden',
     flex: 1,
     minWidth: '45%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 4,
   },
   gradient: {
     padding: 16,
@@ -50,9 +62,14 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'space-between',
   },
-  icon: {
-    fontSize: 32,
-    marginBottom: 4,
+  iconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 10,
   },
   title: {
     fontSize: 14,

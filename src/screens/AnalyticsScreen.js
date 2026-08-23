@@ -1,7 +1,15 @@
+import { Ionicons } from '@expo/vector-icons';
 import { Dimensions, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 import { useRobot } from '../context/RobotContext';
 import { colors } from '../utils/colors';
+
+const SectionTitle = ({ icon, children }) => (
+  <View style={styles.sectionTitleRow}>
+    <Ionicons name={icon} size={17} color={colors.primary} style={styles.sectionTitleIcon} />
+    <Text style={styles.sectionTitle}>{children}</Text>
+  </View>
+);
 
 const screenWidth = Dimensions.get('window').width;
 
@@ -47,13 +55,13 @@ export const AnalyticsScreen = () => {
         {recentData.length > 0 ? (
           <>
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>🌡️ Temperature Trend</Text>
+              <SectionTitle icon="thermometer-outline">Temperature Trend</SectionTitle>
               <LineChart
                 data={{
                   labels: [],
                   datasets: [{ data: temperatureData }],
                 }}
-                width={screenWidth - 32}
+                width={screenWidth - 64}
                 height={180}
                 chartConfig={chartConfig}
                 bezier
@@ -77,13 +85,13 @@ export const AnalyticsScreen = () => {
             </View>
 
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>💨 Gas Levels</Text>
+              <SectionTitle icon="cloud-outline">Gas Levels</SectionTitle>
               <LineChart
                 data={{
                   labels: [],
                   datasets: [{ data: gasData }],
                 }}
-                width={screenWidth - 32}
+                width={screenWidth - 64}
                 height={180}
                 chartConfig={{
                   ...chartConfig,
@@ -108,13 +116,13 @@ export const AnalyticsScreen = () => {
             </View>
 
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>📏 Distance Readings</Text>
+              <SectionTitle icon="resize-outline">Distance Readings</SectionTitle>
               <LineChart
                 data={{
                   labels: [],
                   datasets: [{ data: distanceData }],
                 }}
-                width={screenWidth - 32}
+                width={screenWidth - 64}
                 height={180}
                 chartConfig={{
                   ...chartConfig,
@@ -139,7 +147,7 @@ export const AnalyticsScreen = () => {
             </View>
 
             <View style={styles.summarySection}>
-              <Text style={styles.sectionTitle}>📊 Summary Statistics</Text>
+              <SectionTitle icon="stats-chart-outline">Summary Statistics</SectionTitle>
               <View style={styles.summaryGrid}>
                 <View style={styles.summaryCard}>
                   <Text style={styles.summaryValue}>{stats.totalReadings}</Text>
@@ -158,7 +166,7 @@ export const AnalyticsScreen = () => {
           </>
         ) : (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyIcon}>📈</Text>
+            <Ionicons name="analytics-outline" size={56} color={colors.textDim} style={styles.emptyIcon} />
             <Text style={styles.emptyText}>No data yet</Text>
             <Text style={styles.emptySubtext}>Start collecting sensor data to see analytics</Text>
           </View>
@@ -198,11 +206,18 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderRadius: 12,
   },
+  sectionTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  sectionTitleIcon: {
+    marginRight: 8,
+  },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
     color: colors.text,
-    marginBottom: 12,
   },
   chart: {
     marginVertical: 8,
@@ -258,7 +273,6 @@ const styles = StyleSheet.create({
     paddingVertical: 80,
   },
   emptyIcon: {
-    fontSize: 64,
     marginBottom: 16,
   },
   emptyText: {

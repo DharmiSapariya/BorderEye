@@ -1,22 +1,35 @@
+import { MotiView } from 'moti';
 import { StyleSheet, Text, View } from 'react-native';
 import { DataParser } from '../services/DataParser';
 import { colors } from '../utils/colors';
 
 export const RobotStatus = ({ robotState, sensorData }) => {
-  const statusText = sensorData 
+  const statusText = sensorData
     ? DataParser.getRobotStatusText(robotState, sensorData)
     : '❌ Disconnected';
-  
+
   const statusColor = DataParser.getStatusColor(robotState);
 
   return (
-    <View style={[styles.container, { backgroundColor: statusColor + '20' }]}>
+    <MotiView
+      style={[styles.container, { backgroundColor: statusColor + '20' }]}
+      from={{ opacity: 0, translateY: 10 }}
+      animate={{ opacity: 1, translateY: 0 }}
+      transition={{ type: 'timing', duration: 350 }}
+    >
       <View style={styles.content}>
-        <View style={[styles.indicator, { backgroundColor: statusColor }]} />
+        <View style={styles.indicatorWrap}>
+          <MotiView
+            style={[styles.pulse, { backgroundColor: statusColor }]}
+            from={{ opacity: 0.5, scale: 1 }}
+            animate={{ opacity: 0, scale: 2.4 }}
+            transition={{ type: 'timing', duration: 1400, loop: true }}
+          />
+          <View style={[styles.indicator, { backgroundColor: statusColor }]} />
+        </View>
         <Text style={styles.statusText}>{statusText}</Text>
       </View>
-      <View style={[styles.pulse, { backgroundColor: statusColor }]} />
-    </View>
+    </MotiView>
   );
 };
 
@@ -32,11 +45,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  indicatorWrap: {
+    width: 12,
+    height: 12,
+    marginRight: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   indicator: {
+    position: 'absolute',
     width: 12,
     height: 12,
     borderRadius: 6,
-    marginRight: 12,
   },
   statusText: {
     fontSize: 16,
@@ -49,8 +69,5 @@ const styles = StyleSheet.create({
     width: 12,
     height: 12,
     borderRadius: 6,
-    left: 16,
-    top: 16,
-    opacity: 0.3,
   },
 });
