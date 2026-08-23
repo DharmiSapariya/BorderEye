@@ -1,5 +1,7 @@
+import { Ionicons } from '@expo/vector-icons';
 import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useRobot } from '../context/RobotContext';
+import { BLUETOOTH_DEVICE_NAME } from '../utils/constants';
 import { colors } from '../utils/colors';
 
 export const SettingsScreen = ({ navigation }) => {
@@ -29,7 +31,9 @@ export const SettingsScreen = ({ navigation }) => {
       onPress={onPress}
     >
       <View style={styles.settingContent}>
-        <Text style={styles.settingIcon}>{icon}</Text>
+        <View style={[styles.settingIconWrap, danger && styles.settingIconWrapDanger]}>
+          <Ionicons name={icon} size={18} color={danger ? colors.danger : colors.primary} />
+        </View>
         <View style={styles.settingText}>
           <Text style={[styles.settingTitle, danger && styles.dangerText]}>
             {title}
@@ -39,7 +43,7 @@ export const SettingsScreen = ({ navigation }) => {
           )}
         </View>
       </View>
-      <Text style={styles.arrow}>›</Text>
+      <Ionicons name="chevron-forward" size={18} color={colors.textDim} />
     </TouchableOpacity>
   );
 
@@ -60,7 +64,7 @@ export const SettingsScreen = ({ navigation }) => {
           </View>
 
           <SettingItem
-            icon="🔌"
+            icon="power-outline"
             title="Disconnect Robot"
             subtitle="End current connection"
             onPress={handleDisconnect}
@@ -70,16 +74,16 @@ export const SettingsScreen = ({ navigation }) => {
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Notifications</Text>
-          
+
           <SettingItem
-            icon="📳"
+            icon="phone-portrait-outline"
             title="Haptic Feedback"
             subtitle="Currently enabled"
             onPress={() => Alert.alert('Info', 'Haptic feedback is enabled for alerts')}
           />
-          
+
           <SettingItem
-            icon="🔔"
+            icon="notifications-outline"
             title="Alert Sounds"
             subtitle="Currently disabled"
             onPress={() => Alert.alert('Info', 'Sound alerts are disabled')}
@@ -88,16 +92,16 @@ export const SettingsScreen = ({ navigation }) => {
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Thresholds</Text>
-          
+
           <SettingItem
-            icon="💨"
+            icon="cloud-outline"
             title="Gas Alert Level"
             subtitle="Triggers at 450"
             onPress={() => Alert.alert('Info', 'Gas alert threshold: 450')}
           />
-          
+
           <SettingItem
-            icon="📏"
+            icon="resize-outline"
             title="Distance Warning"
             subtitle="Triggers at 15cm"
             onPress={() => Alert.alert('Info', 'Distance warning threshold: 15cm')}
@@ -193,9 +197,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flex: 1,
   },
-  settingIcon: {
-    fontSize: 24,
+  settingIconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: colors.primary + '1F',
+    alignItems: 'center',
+    justifyContent: 'center',
     marginRight: 12,
+  },
+  settingIconWrapDanger: {
+    backgroundColor: colors.danger + '1F',
   },
   settingText: {
     flex: 1,
@@ -212,10 +224,6 @@ const styles = StyleSheet.create({
   },
   dangerText: {
     color: colors.danger,
-  },
-  arrow: {
-    fontSize: 24,
-    color: colors.textDim,
   },
   aboutCard: {
     backgroundColor: colors.surface,

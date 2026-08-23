@@ -2,6 +2,7 @@
  * WiFi Service for connecting to Arduino Bridge Server
  * Replaces BluetoothService when using USB cable + computer bridge
  */
+import DemoModeService from './DemoModeService';
 
 // ⚠️ CHANGE THIS: Your computer's IP address
 // Get this from the bridge server output
@@ -15,6 +16,7 @@ class WiFiService {
     this.serverUrl = null;
     this.dataListeners = [];
     this.pollInterval = null;
+    this.usingDemo = false;
   }
 
   /**
@@ -24,12 +26,16 @@ class WiFiService {
     console.log('Scanning for Arduino bridge server...');
     
     try {
-      // Try to connect to server
+      // Try to connect to server (fetch has no native timeout option, so abort manually)
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
+
       const response = await fetch(`${BASE_URL}/status`, {
         method: 'GET',
-        timeout: 3000,
+        signal: controller.signal,
       });
-      
+      clearTimeout(timeoutId);
+
       const status = await response.json();
       
       if (status.connected) {
@@ -57,26 +63,38 @@ class WiFiService {
   }
 
   /**
-   * Connect to bridge server
+   * Connect to bridge server. Devices flagged non-real (no bridge server found
+   * during scan) are routed to DemoModeService instead of retrying the fetch.
    */
   async connect(device) {
     console.log(`Connecting to ${device.name}...`);
-    
+
+    if (device.isReal === false) {
+      this.usingDemo = true;
+      const ok = await DemoModeService.connect(device);
+      this.isConnected = ok;
+      return ok;
+    }
+
     try {
-      // Verify server is reachable
-      const response = await fetch(`${BASE_URL}/status`);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
+
+      const response = await fetch(`${BASE_URL}/status`, { signal: controller.signal });
+      clearTimeout(timeoutId);
       const status = await response.json();
-      
+
       if (!status.connected) {
         throw new Error('Arduino not connected to bridge server');
       }
-      
+
+      this.usingDemo = false;
       this.isConnected = true;
       this.serverUrl = device.address;
-      
+
       // Start polling for data
       this.startDataPolling();
-      
+
       return true;
     } catch (error) {
       console.error('Connection failed:', error);
@@ -90,11 +108,16 @@ class WiFiService {
    */
   async disconnect() {
     console.log('Disconnecting...');
-    
+
+    if (this.usingDemo) {
+      await DemoModeService.disconnect();
+      this.usingDemo = false;
+    }
+
     this.isConnected = false;
     this.stopDataPolling();
     this.serverUrl = null;
-    
+
     return true;
   }
 
@@ -102,6 +125,10 @@ class WiFiService {
    * Subscribe to incoming data
    */
   onDataReceived(callback) {
+    if (this.usingDemo) {
+      DemoModeService.onDataReceived(callback);
+      return;
+    }
     this.dataListeners.push(callback);
   }
 
@@ -109,6 +136,10 @@ class WiFiService {
    * Remove data listener
    */
   removeDataListener(callback) {
+    if (this.usingDemo) {
+      DemoModeService.removeDataListener(callback);
+      return;
+    }
     this.dataListeners = this.dataListeners.filter(cb => cb !== callback);
   }
 
@@ -152,6 +183,9 @@ class WiFiService {
   }
 
   getConnectedDevice() {
+    if (this.usingDemo) {
+      return DemoModeService.getConnectedDevice();
+    }
     return this.serverUrl ? {
       name: 'Arduino Bridge (USB)',
       address: this.serverUrl,

@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { AlertCard } from '../components/AlertCard';
@@ -9,14 +10,14 @@ export const AlertsScreen = () => {
   const [filter, setFilter] = useState('all');
 
   const filters = [
-    { id: 'all', label: 'All', icon: '📋' },
-    { id: 'gas', label: 'Gas', icon: '💨' },
-    { id: 'metal', label: 'Metal', icon: '🔩' },
-    { id: 'obstacle', label: 'Obstacle', icon: '⚠️' },
+    { id: 'all', label: 'All', icon: 'list-outline' },
+    { id: 'gas', label: 'Gas', icon: 'cloud-outline' },
+    { id: 'metal', label: 'Metal', icon: 'magnet-outline' },
+    { id: 'obstacle', label: 'Obstacle', icon: 'warning-outline' },
   ];
 
-  const filteredAlerts = filter === 'all' 
-    ? alerts 
+  const filteredAlerts = filter === 'all'
+    ? alerts
     : alerts.filter(alert => alert.type === filter);
 
   const renderFilter = (item) => (
@@ -27,7 +28,12 @@ export const AlertsScreen = () => {
       ]}
       onPress={() => setFilter(item.id)}
     >
-      <Text style={styles.filterIcon}>{item.icon}</Text>
+      <Ionicons
+        name={item.icon}
+        size={15}
+        color={filter === item.id ? colors.text : colors.textSecondary}
+        style={styles.filterIcon}
+      />
       <Text style={[
         styles.filterText,
         filter === item.id && styles.filterTextActive
@@ -58,14 +64,14 @@ export const AlertsScreen = () => {
       {filteredAlerts.length > 0 ? (
         <FlatList
           data={filteredAlerts}
-          renderItem={({ item }) => <AlertCard alert={item} />}
+          renderItem={({ item, index }) => <AlertCard alert={item} index={index} />}
           keyExtractor={(item) => item.id.toString()}
           contentContainerStyle={styles.list}
           showsVerticalScrollIndicator={false}
         />
       ) : (
         <View style={styles.emptyState}>
-          <Text style={styles.emptyIcon}>✅</Text>
+          <Ionicons name="checkmark-circle-outline" size={56} color={colors.success} style={styles.emptyIcon} />
           <Text style={styles.emptyText}>No alerts</Text>
           <Text style={styles.emptySubtext}>
             {filter === 'all' 
@@ -121,7 +127,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
   },
   filterIcon: {
-    fontSize: 16,
     marginRight: 6,
   },
   filterText: {
@@ -143,7 +148,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
   },
   emptyIcon: {
-    fontSize: 64,
     marginBottom: 16,
   },
   emptyText: {
