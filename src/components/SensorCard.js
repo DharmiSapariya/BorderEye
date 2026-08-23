@@ -1,102 +1,119 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
+import { BlurView } from 'expo-blur';
 import { MotiView } from 'moti';
-import { StyleSheet, Text, View } from 'react-native';
-import { colors } from '../utils/colors';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { blur, colors, motion, radius, shadow, spacing, typography } from '../utils/theme';
 
-export const SensorCard = ({ title, value, unit, icon, gradient, status, index = 0 }) => {
-  return (
+export const SensorCard = ({ title, value, unit, icon, accent = colors.primary, status, index = 0, onPress }) => {
+  const content = ({ pressed } = {}) => (
     <MotiView
-      style={styles.card}
-      from={{ opacity: 0, translateY: 14, scale: 0.96 }}
-      animate={{ opacity: 1, translateY: 0, scale: 1 }}
-      transition={{ type: 'timing', duration: 380, delay: index * 70 }}
+      style={[styles.card, shadow.md, pressed && styles.pressed]}
+      from={{ opacity: 0, translateY: 14, scale: 0.97 }}
+      animate={{ opacity: 1, translateY: 0, scale: pressed ? 0.97 : 1 }}
+      transition={{ type: 'timing', duration: motion.normal, delay: index * motion.stagger }}
     >
-      <LinearGradient
-        colors={gradient || colors.gradients.blue}
-        style={styles.gradient}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-      >
-        <View style={styles.content}>
-          <View style={styles.iconWrap}>
-            <MaterialCommunityIcons name={icon} size={22} color="#FFFFFF" />
-          </View>
-          <Text style={styles.title}>{title}</Text>
-          <Text style={styles.value}>
-            {value !== null && value !== undefined ? value : '--'}
-            <Text style={styles.unit}>{unit}</Text>
-          </Text>
-          {status && (
-            <View style={[
-              styles.statusBadge,
-              { backgroundColor: status.color }
-            ]}>
-              <Text style={styles.statusText}>{status.text}</Text>
-            </View>
-          )}
+      <BlurView intensity={blur.subtle} tint={blur.tint} style={StyleSheet.absoluteFill} />
+      <View style={styles.tint} pointerEvents="none" />
+      <View style={styles.content}>
+        <View style={[styles.iconBadge, { backgroundColor: accent + '1F', borderColor: accent + '38' }]}>
+          <MaterialCommunityIcons name={icon} size={18} color={accent} />
         </View>
-      </LinearGradient>
+        <Text style={styles.title}>{title}</Text>
+        <Text style={styles.value}>
+          {value !== null && value !== undefined ? value : '--'}
+          {unit ? <Text style={styles.unit}>{unit}</Text> : null}
+        </Text>
+        {status && (
+          <View style={[styles.statusBadge, { backgroundColor: status.color + '1F' }]}>
+            <View style={[styles.statusDot, { backgroundColor: status.color }]} />
+            <Text style={[styles.statusText, { color: status.color }]}>{status.text}</Text>
+          </View>
+        )}
+      </View>
     </MotiView>
+  );
+
+  if (!onPress) return <View style={styles.grid}>{content({})}</View>;
+
+  return (
+    <Pressable
+      onPress={onPress}
+      style={styles.grid}
+      accessibilityRole="button"
+      accessibilityLabel={`${title}: ${value ?? 'no reading'} ${unit || ''}${status ? `, ${status.text}` : ''}`}
+    >
+      {content}
+    </Pressable>
   );
 };
 
 const styles = StyleSheet.create({
+  grid: {
+    flex: 1,
+    minWidth: '46%',
+    margin: spacing.xs,
+  },
   card: {
-    margin: 8,
-    borderRadius: 18,
+    borderRadius: radius.lg,
     overflow: 'hidden',
     flex: 1,
-    minWidth: '45%',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.25,
-    shadowRadius: 10,
-    elevation: 4,
+    borderWidth: 1,
+    borderColor: colors.border,
+    minHeight: 130,
   },
-  gradient: {
-    padding: 16,
-    minHeight: 140,
+  pressed: {
+    borderColor: colors.borderStrong,
+  },
+  tint: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: colors.surfaceGlass,
   },
   content: {
+    padding: spacing.md,
     flex: 1,
     justifyContent: 'space-between',
   },
-  iconWrap: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: 'rgba(255,255,255,0.18)',
+  iconBadge: {
+    width: 34,
+    height: 34,
+    borderRadius: radius.sm,
+    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 10,
+    marginBottom: spacing.sm,
   },
   title: {
-    fontSize: 14,
-    color: 'rgba(255,255,255,0.9)',
-    fontWeight: '600',
-    marginBottom: 8,
+    ...typography.label,
+    color: colors.textSecondary,
+    marginBottom: 6,
   },
   value: {
-    fontSize: 28,
-    color: '#FFFFFF',
-    fontWeight: 'bold',
+    ...typography.metric,
+    color: colors.text,
   },
   unit: {
-    fontSize: 16,
-    color: 'rgba(255,255,255,0.8)',
-    fontWeight: '400',
+    fontSize: 14,
+    fontWeight: '500',
+    color: colors.textSecondary,
   },
   statusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
     alignSelf: 'flex-start',
-    paddingHorizontal: 10,
+    paddingHorizontal: spacing.sm,
     paddingVertical: 4,
-    borderRadius: 12,
-    marginTop: 8,
+    borderRadius: radius.pill,
+    marginTop: spacing.sm,
+  },
+  statusDot: {
+    width: 5,
+    height: 5,
+    borderRadius: 3,
+    marginRight: 5,
   },
   statusText: {
-    color: '#FFFFFF',
     fontSize: 11,
-    fontWeight: '600',
+    fontWeight: '700',
+    letterSpacing: 0.2,
   },
 });

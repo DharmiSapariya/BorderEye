@@ -87,7 +87,7 @@ export const ConnectionScreen = ({ navigation }) => {
           disabled={scanning || connecting}
         >
           <LinearGradient
-            colors={colors.gradients.blue}
+            colors={colors.gradients.primary}
             style={styles.buttonGradient}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}

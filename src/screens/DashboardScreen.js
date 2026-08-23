@@ -1,19 +1,22 @@
-import { MotiView } from 'moti';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { AlertCard } from '../components/AlertCard';
 import { ConnectionBadge } from '../components/ConnectionBadge';
+import { EmptyState } from '../components/EmptyState';
 import { RobotStatus } from '../components/RobotStatus';
+import { SectionHeader } from '../components/SectionHeader';
 import { SensorCard } from '../components/SensorCard';
 import { useRobot } from '../context/RobotContext';
-import { colors } from '../utils/colors';
+import AlertService from '../services/AlertService';
+import { colors, layout, radius, spacing, typography } from '../utils/theme';
 import { THRESHOLDS } from '../utils/constants';
 
-export const DashboardScreen = () => {
-  const { sensorData, robotState, connectedDevice, stats, uptime } = useRobot();
+export const DashboardScreen = ({ navigation }) => {
+  const { sensorData, robotState, connectedDevice, stats, uptime, alerts } = useRobot();
 
   const getGasStatus = (gasValue) => {
     if (!gasValue) return null;
     if (gasValue > THRESHOLDS.GAS_DANGER) {
-      return { text: 'DANGER', color: colors.danger };
+      return { text: 'Danger', color: colors.danger };
     } else if (gasValue > THRESHOLDS.GAS_DANGER - 100) {
       return { text: 'Caution', color: colors.warning };
     }
@@ -32,102 +35,141 @@ export const DashboardScreen = () => {
 
   const getMetalStatus = (metal) => {
     if (metal === null || metal === undefined) return null;
-    return metal === 0 
-      ? { text: 'DETECTED', color: colors.danger }
+    return metal === 0
+      ? { text: 'Detected', color: colors.danger }
       : { text: 'Clear', color: colors.success };
   };
+
+  // Critical/warning alerts surface here; everything else lives on the Alerts tab.
+  const SEVERITY_RANK = { critical: 0, warning: 1, info: 2 };
+  const topAlerts = [...alerts]
+    .sort((a, b) => SEVERITY_RANK[AlertService.getAlertSeverity(a.type)] - SEVERITY_RANK[AlertService.getAlertSeverity(b.type)])
+    .slice(0, 2);
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <View>
+        <View style={styles.headerInner}>
           <Text style={styles.title}>Dashboard</Text>
-          <ConnectionBadge 
-            isConnected={true} 
-            deviceName={connectedDevice?.name || 'Robot'} 
+          <ConnectionBadge
+            isConnected={true}
+            deviceName={connectedDevice?.name || 'Robot'}
           />
         </View>
       </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <RobotStatus robotState={robotState} sensorData={sensorData} />
-
-        <View style={styles.sensorGrid}>
-          <SensorCard
-            index={0}
-            title="Temperature"
-            value={sensorData?.temperature?.toFixed(1)}
-            unit="°C"
-            icon="thermometer"
-            gradient={colors.gradients.orange}
+      <ScrollView
+        style={styles.content}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.contentInner}>
+          {/* PRIMARY: overall system/robot status */}
+          <RobotStatus
+            robotState={robotState}
+            sensorData={sensorData}
+            deviceName={connectedDevice?.name}
+            uptime={uptime}
           />
 
-          <SensorCard
-            index={1}
-            title="Humidity"
-            value={sensorData?.humidity?.toFixed(0)}
-            unit="%"
-            icon="water-percent"
-            gradient={colors.gradients.blue}
-          />
-
-          <SensorCard
-            index={2}
-            title="Air Quality"
-            value={sensorData?.gas}
-            unit=""
-            icon="weather-windy"
-            gradient={colors.gradients.purple}
-            status={getGasStatus(sensorData?.gas)}
-          />
-
-          <SensorCard
-            index={3}
-            title="Distance"
-            value={sensorData?.distance}
-            unit="cm"
-            icon="radar"
-            gradient={colors.gradients.green}
-            status={getDistanceStatus(sensorData?.distance)}
-          />
-        </View>
-
-        <View style={styles.metalCard}>
-          <SensorCard
-            index={4}
-            title="Metal Detection"
-            value={sensorData?.metal === 0 ? 'DETECTED' : 'None'}
-            unit=""
-            icon="magnet"
-            gradient={colors.gradients.red}
-            status={getMetalStatus(sensorData?.metal)}
-          />
-        </View>
-
-        <MotiView
-          style={styles.statsContainer}
-          from={{ opacity: 0, translateY: 14 }}
-          animate={{ opacity: 1, translateY: 0 }}
-          transition={{ type: 'timing', duration: 380, delay: 5 * 70 }}
-        >
-          <Text style={styles.statsTitle}>Quick Stats</Text>
-          <View style={styles.statsGrid}>
-            <View style={styles.statCard}>
-              <Text style={styles.statValue}>{uptime}</Text>
-              <Text style={styles.statLabel}>Uptime</Text>
+          {/* SECONDARY: critical alerts, only when they exist */}
+          {topAlerts.length > 0 && (
+            <View style={styles.section}>
+              <View style={styles.sectionPadded}>
+                <SectionHeader
+                  title="Critical Alerts"
+                  icon="alert-triangle"
+                  actionLabel="View all"
+                  onAction={() => navigation.navigate('Alerts')}
+                />
+              </View>
+              {topAlerts.map((alert, i) => (
+                <AlertCard key={alert.id} alert={alert} index={i} />
+              ))}
             </View>
-            <View style={styles.statDivider} />
-            <View style={styles.statCard}>
-              <Text style={styles.statValue}>{stats.obstaclesAvoided}</Text>
-              <Text style={styles.statLabel}>Obstacles</Text>
+          )}
+
+          {/* SECONDARY: key sensor metrics */}
+          <View style={styles.section}>
+            <View style={styles.sectionPadded}>
+              <SectionHeader title="Sensors" icon="activity" />
             </View>
-            <View style={styles.statDivider} />
-            <View style={styles.statCard}>
-              <Text style={styles.statValue}>{stats.alertsTriggered}</Text>
-              <Text style={styles.statLabel}>Alerts</Text>
+            <View style={styles.sensorGrid}>
+              <SensorCard
+                index={0}
+                title="Temperature"
+                value={sensorData?.temperature?.toFixed(1)}
+                unit="°C"
+                icon="thermometer"
+                accent={colors.temperature}
+              />
+              <SensorCard
+                index={1}
+                title="Humidity"
+                value={sensorData?.humidity?.toFixed(0)}
+                unit="%"
+                icon="water-percent"
+                accent={colors.humidity}
+              />
+              <SensorCard
+                index={2}
+                title="Air Quality"
+                value={sensorData?.gas}
+                unit=""
+                icon="weather-windy"
+                accent={colors.gas}
+                status={getGasStatus(sensorData?.gas)}
+              />
+              <SensorCard
+                index={3}
+                title="Distance"
+                value={sensorData?.distance}
+                unit="cm"
+                icon="radar"
+                accent={colors.distance}
+                status={getDistanceStatus(sensorData?.distance)}
+              />
+              <SensorCard
+                index={4}
+                title="Metal Detection"
+                value={sensorData?.metal === 0 ? 'Detected' : 'None'}
+                unit=""
+                icon="magnet"
+                accent={colors.metal}
+                status={getMetalStatus(sensorData?.metal)}
+              />
             </View>
           </View>
-        </MotiView>
+
+          {/* TERTIARY: session stats */}
+          <View style={[styles.section, styles.statsCard]}>
+            <SectionHeader title="Session" icon="bar-chart-2" />
+            <View style={styles.statsGrid}>
+              <View style={styles.statItem}>
+                <Text style={styles.statValue}>{uptime}</Text>
+                <Text style={styles.statLabel}>Uptime</Text>
+              </View>
+              <View style={styles.statDivider} />
+              <View style={styles.statItem}>
+                <Text style={styles.statValue}>{stats.obstaclesAvoided}</Text>
+                <Text style={styles.statLabel}>Obstacles</Text>
+              </View>
+              <View style={styles.statDivider} />
+              <View style={styles.statItem}>
+                <Text style={styles.statValue}>{stats.alertsTriggered}</Text>
+                <Text style={styles.statLabel}>Alerts</Text>
+              </View>
+            </View>
+          </View>
+
+          {!sensorData && (
+            <EmptyState
+              icon="radio"
+              title="Waiting for sensor data"
+              subtitle="Readings will appear here as soon as telemetry starts streaming in."
+            />
+          )}
+        </View>
       </ScrollView>
     </View>
   );
@@ -140,50 +182,51 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingTop: 56,
-    paddingHorizontal: 20,
-    paddingBottom: 20,
+    paddingHorizontal: spacing.xl,
+    paddingBottom: spacing.xl,
     backgroundColor: colors.backgroundLight,
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  headerInner: {
+    width: '100%',
+    maxWidth: layout.maxContentWidth,
+    alignSelf: 'center',
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
+    ...typography.screenTitle,
     color: colors.text,
-    marginBottom: 10,
-    letterSpacing: 0.2,
+    marginBottom: spacing.sm,
   },
   content: {
     flex: 1,
   },
+  scrollContent: {
+    alignItems: 'center',
+    paddingBottom: spacing.xxl,
+  },
+  contentInner: {
+    width: '100%',
+    maxWidth: layout.maxContentWidth,
+  },
+  section: {
+    marginTop: spacing.xxl,
+  },
+  sectionPadded: {
+    paddingHorizontal: spacing.lg,
+  },
   sensorGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    paddingHorizontal: 8,
+    paddingHorizontal: spacing.sm,
   },
-  metalCard: {
-    paddingHorizontal: 8,
-  },
-  statsContainer: {
-    margin: 16,
-    marginTop: 8,
-    marginBottom: 28,
-    padding: 20,
+  statsCard: {
+    marginHorizontal: spacing.lg,
+    padding: spacing.lg,
     backgroundColor: colors.surface,
-    borderRadius: 18,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  statsTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.textSecondary,
-    marginBottom: 16,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   statsGrid: {
     flexDirection: 'row',
@@ -193,20 +236,20 @@ const styles = StyleSheet.create({
   statDivider: {
     width: 1,
     height: 32,
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: colors.border,
   },
-  statCard: {
+  statItem: {
     alignItems: 'center',
     flex: 1,
   },
   statValue: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    ...typography.cardTitle,
+    fontSize: 22,
     color: colors.primary,
     marginBottom: 4,
   },
   statLabel: {
-    fontSize: 12,
+    ...typography.metadata,
     color: colors.textSecondary,
   },
 });
