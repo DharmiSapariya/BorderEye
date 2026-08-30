@@ -98,7 +98,8 @@ export const DashboardScreen = ({ navigation }) => {
               <SensorCard
                 index={0}
                 title="Temperature"
-                value={sensorData?.temperature?.toFixed(1)}
+                value={sensorData?.temperature}
+                decimals={1}
                 unit="°C"
                 icon="thermometer"
                 accent={colors.temperature}
@@ -106,7 +107,8 @@ export const DashboardScreen = ({ navigation }) => {
               <SensorCard
                 index={1}
                 title="Humidity"
-                value={sensorData?.humidity?.toFixed(0)}
+                value={sensorData?.humidity}
+                decimals={0}
                 unit="%"
                 icon="water-percent"
                 accent={colors.humidity}

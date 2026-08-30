@@ -2,9 +2,11 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import { MotiView } from 'moti';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { AnimatedNumber } from './AnimatedNumber';
 import { blur, colors, motion, radius, shadow, spacing, typography } from '../utils/theme';
 
-export const SensorCard = ({ title, value, unit, icon, accent = colors.primary, status, index = 0, onPress }) => {
+export const SensorCard = ({ title, value, decimals = 0, unit, icon, accent = colors.primary, status, index = 0, onPress }) => {
+  const isNumeric = typeof value === 'number' && !Number.isNaN(value);
   const content = ({ pressed } = {}) => (
     <MotiView
       style={[styles.card, shadow.md, pressed && styles.pressed]}
@@ -19,10 +21,14 @@ export const SensorCard = ({ title, value, unit, icon, accent = colors.primary, 
           <MaterialCommunityIcons name={icon} size={18} color={accent} />
         </View>
         <Text style={styles.title}>{title}</Text>
-        <Text style={styles.value}>
-          {value !== null && value !== undefined ? value : '--'}
+        <View style={styles.valueRow}>
+          {isNumeric ? (
+            <AnimatedNumber value={value} decimals={decimals} style={styles.value} />
+          ) : (
+            <Text style={styles.value}>{value !== null && value !== undefined ? value : '--'}</Text>
+          )}
           {unit ? <Text style={styles.unit}>{unit}</Text> : null}
-        </Text>
+        </View>
         {status && (
           <View style={[styles.statusBadge, { backgroundColor: status.color + '1F' }]}>
             <View style={[styles.statusDot, { backgroundColor: status.color }]} />
@@ -87,6 +93,10 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     marginBottom: 6,
   },
+  valueRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+  },
   value: {
     ...typography.metric,
     color: colors.text,
@@ -95,6 +105,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
     color: colors.textSecondary,
+    marginLeft: 2,
+    marginBottom: 3,
   },
   statusBadge: {
     flexDirection: 'row',
