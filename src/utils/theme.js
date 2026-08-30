@@ -107,20 +107,22 @@ export const fontFamily = {
 
 // Font sizing/weight scale. Color is applied by the caller (usually
 // colors.text or colors.textSecondary) so these stay theme-neutral.
-// Display (Space Grotesk) carries headings/titles; mono (JetBrains Mono)
-// carries technical labels, metrics, and timestamps — body copy stays on
-// the system font for paragraph readability. fontWeight is omitted where
-// a specific weight's font file is already loaded, since pairing a named
-// weight file with a conflicting fontWeight can make RN synthesize a
-// second bold pass or silently ignore the custom face.
+// Display (Space Grotesk) carries headings, titles, section labels, and
+// UI labels — mono (JetBrains Mono) is reserved for actual technical
+// readouts (metrics, timestamps) so the app reads as designed rather than
+// as a terminal. Body copy stays on the system font for paragraph
+// readability. fontWeight is omitted where a specific weight's font file
+// is already loaded, since pairing a named weight file with a conflicting
+// fontWeight can make RN synthesize a second bold pass or silently ignore
+// the custom face.
 export const typography = {
   screenTitle: { fontFamily: fontFamily.displayBold, fontSize: 26, letterSpacing: 0.1 },
-  sectionTitle: { fontFamily: fontFamily.monoBold, fontSize: 12, letterSpacing: 0.8, textTransform: 'uppercase' },
+  sectionTitle: { fontFamily: fontFamily.displaySemiBold, fontSize: 13, letterSpacing: 0.6, textTransform: 'uppercase' },
   cardTitle: { fontFamily: fontFamily.displaySemiBold, fontSize: 15, letterSpacing: 0.1 },
   metric: { fontFamily: fontFamily.monoBold, fontSize: 30, letterSpacing: -0.3 },
   metricLarge: { fontFamily: fontFamily.monoBold, fontSize: 40, letterSpacing: -0.5 },
   body: { fontSize: 14, fontWeight: '400', lineHeight: 20 },
-  label: { fontFamily: fontFamily.monoMedium, fontSize: 12, letterSpacing: 0.2 },
+  label: { fontFamily: fontFamily.displayMedium, fontSize: 13, letterSpacing: 0.1 },
   metadata: { fontFamily: fontFamily.monoRegular, fontSize: 12 },
   timestamp: { fontFamily: fontFamily.monoRegular, fontSize: 11 },
 };
