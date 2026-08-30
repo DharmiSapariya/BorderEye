@@ -2,7 +2,8 @@ import { Feather } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { MotiView } from 'moti';
 import { useRef } from 'react';
-import { Animated, Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Animated, Dimensions, StyleSheet, Text, View } from 'react-native';
+import { PressScale } from '../components/PressScale';
 import { SectionHeader } from '../components/SectionHeader';
 import { SensingLayers } from '../components/SensingLayers';
 import { SignalFlowDiagram } from '../components/SignalFlowDiagram';
@@ -147,15 +148,14 @@ export const WelcomeScreen = ({ navigation }) => {
           Connect to a BorderEye unit to see live sensor data, alerts, and
           analytics — or explore in demo mode with simulated data.
         </Text>
-        <TouchableOpacity
+        <PressScale
           style={styles.ctaButton}
           onPress={() => navigation.navigate('Connection')}
-          accessibilityRole="button"
           accessibilityLabel="Connect to device"
         >
           <Text style={styles.ctaButtonText}>CONNECT TO DEVICE</Text>
           <Feather name="arrow-right" size={16} color={colors.textOnDark} />
-        </TouchableOpacity>
+        </PressScale>
       </MotiView>
 
       <Text style={styles.footerNote}>BorderEye — Prototype / Research Project</Text>

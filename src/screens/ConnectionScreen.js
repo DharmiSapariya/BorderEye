@@ -1,7 +1,8 @@
 import { Feather, Ionicons } from '@expo/vector-icons';
 import { MotiView } from 'moti';
 import { useState } from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
+import { PressScale } from '../components/PressScale';
 import { useRobot } from '../context/RobotContext';
 import WiFiService from '../services/WiFiService';
 import { colors, layout, radius, shadow, spacing, typography } from '../utils/theme';
@@ -42,11 +43,10 @@ export const ConnectionScreen = ({ navigation }) => {
       animate={{ opacity: 1, translateY: 0 }}
       transition={{ type: 'timing', duration: 300, delay: index * 60 }}
     >
-      <TouchableOpacity
+      <PressScale
         style={[styles.deviceCard, shadow.sm]}
         onPress={() => handleConnect(item)}
         disabled={connecting}
-        accessibilityRole="button"
         accessibilityLabel={`Connect to ${item.name}`}
       >
         <View style={styles.deviceIconWrap}>
@@ -62,7 +62,7 @@ export const ConnectionScreen = ({ navigation }) => {
           )}
         </View>
         <Ionicons name="chevron-forward" size={20} color={colors.textDim} />
-      </TouchableOpacity>
+      </PressScale>
     </MotiView>
   );
 
@@ -89,11 +89,10 @@ export const ConnectionScreen = ({ navigation }) => {
 
       <View style={styles.content}>
         <View style={styles.contentInner}>
-          <TouchableOpacity
-            style={[styles.scanButton, scanning && styles.scanButtonDisabled]}
+          <PressScale
+            style={styles.scanButton}
             onPress={handleScan}
             disabled={scanning || connecting}
-            accessibilityRole="button"
             accessibilityLabel={devices.length > 0 ? 'Scan again' : 'Scan for devices'}
           >
             {scanning ? (
@@ -106,7 +105,7 @@ export const ConnectionScreen = ({ navigation }) => {
                 </Text>
               </>
             )}
-          </TouchableOpacity>
+          </PressScale>
 
           {connecting && (
             <View style={styles.connectingContainer}>
@@ -209,9 +208,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.xxl,
-  },
-  scanButtonDisabled: {
-    opacity: 0.6,
   },
   scanButtonText: {
     ...typography.label,

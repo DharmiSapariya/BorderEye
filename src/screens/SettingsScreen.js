@@ -1,6 +1,7 @@
 import { Feather, Ionicons } from '@expo/vector-icons';
-import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { ArchitectureDiagram } from '../components/ArchitectureDiagram';
+import { PressScale } from '../components/PressScale';
 import { SectionHeader } from '../components/SectionHeader';
 import { useRobot } from '../context/RobotContext';
 import { BLUETOOTH_DEVICE_NAME, REFRESH_RATE, THRESHOLDS } from '../utils/constants';
@@ -28,7 +29,7 @@ export const SettingsScreen = ({ navigation }) => {
   };
 
   const SettingItem = ({ icon, title, subtitle, onPress, danger }) => (
-    <TouchableOpacity style={styles.settingItem} onPress={onPress} accessibilityRole="button" accessibilityLabel={title}>
+    <PressScale style={styles.settingItem} onPress={onPress} accessibilityLabel={title}>
       <View style={styles.settingContent}>
         <View style={[styles.settingIconWrap, danger && styles.settingIconWrapDanger]}>
           <Ionicons name={icon} size={17} color={danger ? colors.danger : colors.primary} />
@@ -39,7 +40,7 @@ export const SettingsScreen = ({ navigation }) => {
         </View>
       </View>
       <Ionicons name="chevron-forward" size={17} color={colors.textDim} />
-    </TouchableOpacity>
+    </PressScale>
   );
 
   const ThresholdRow = ({ label, value }) => (
