@@ -1,13 +1,17 @@
 import { Feather } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { MotiView } from 'moti';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useRef } from 'react';
+import { Animated, Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SectionHeader } from '../components/SectionHeader';
 import { SensingLayers } from '../components/SensingLayers';
 import { SignalFlowDiagram } from '../components/SignalFlowDiagram';
-import { colors, layout, radius, shadow, spacing, typography } from '../utils/theme';
+import { TechnicalGrid } from '../components/TechnicalGrid';
+import { colors, fontFamily, layout, radius, shadow, spacing, typography } from '../utils/theme';
 
 const hardwareImage = require('../../assets/border-eye-hardware.jpg');
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const HERO_HEIGHT = 300;
 
 const SNAPSHOT = [
   { value: '04', label: 'SENSORS' },
@@ -16,26 +20,47 @@ const SNAPSHOT = [
   { value: 'MULTI', label: 'THREAT DETECTION' },
 ];
 
-export const WelcomeScreen = ({ navigation }) => (
-  <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+export const WelcomeScreen = ({ navigation }) => {
+  const scrollY = useRef(new Animated.Value(0)).current;
+
+  const heroOpacity = scrollY.interpolate({ inputRange: [0, 200], outputRange: [1, 0.1], extrapolate: 'clamp' });
+  const heroTranslate = scrollY.interpolate({ inputRange: [0, 200], outputRange: [0, -36], extrapolate: 'clamp' });
+  const heroScale = scrollY.interpolate({ inputRange: [0, 200], outputRange: [1, 0.95], extrapolate: 'clamp' });
+  const gridTranslate = scrollY.interpolate({ inputRange: [0, 400], outputRange: [0, 70], extrapolate: 'clamp' });
+
+  return (
+  <Animated.ScrollView
+    style={styles.container}
+    contentContainerStyle={styles.scrollContent}
+    showsVerticalScrollIndicator={false}
+    scrollEventThrottle={16}
+    onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: true })}
+  >
+    <Animated.View style={[styles.gridLayer, { transform: [{ translateY: gridTranslate }] }]}>
+      <TechnicalGrid width={SCREEN_WIDTH} height={HERO_HEIGHT + 80} step={26} opacity={0.55} />
+    </Animated.View>
     <View style={styles.inner}>
       {/* HERO */}
-      <MotiView
-        from={{ opacity: 0, translateY: 10 }}
-        animate={{ opacity: 1, translateY: 0 }}
-        transition={{ type: 'timing', duration: 400 }}
+      <Animated.View
+        style={{ opacity: heroOpacity, transform: [{ translateY: heroTranslate }, { scale: heroScale }] }}
       >
-        <View style={styles.statusPill}>
-          <View style={styles.statusDot} />
-          <Text style={styles.statusPillText}>PROTOTYPE / RESEARCH PROJECT</Text>
-        </View>
-        <Text style={styles.wordmark}>BORDEREYE</Text>
-        <Text style={styles.tagline}>AUTONOMOUS PERIMETER SYSTEM</Text>
-        <Text style={styles.hero}>
-          A mobile, multi-sensor platform for real-time perimeter monitoring,
-          environmental sensing, and intrusion detection.
-        </Text>
-      </MotiView>
+        <MotiView
+          from={{ opacity: 0, translateY: 10 }}
+          animate={{ opacity: 1, translateY: 0 }}
+          transition={{ type: 'timing', duration: 400 }}
+        >
+          <View style={styles.statusPill}>
+            <View style={styles.statusDot} />
+            <Text style={styles.statusPillText}>PROTOTYPE / RESEARCH PROJECT</Text>
+          </View>
+          <Text style={styles.wordmark}>BORDEREYE</Text>
+          <Text style={styles.tagline}>AUTONOMOUS PERIMETER SYSTEM</Text>
+          <Text style={styles.hero}>
+            A mobile, multi-sensor platform for real-time perimeter monitoring,
+            environmental sensing, and intrusion detection.
+          </Text>
+        </MotiView>
+      </Animated.View>
 
       {/* SYSTEM SNAPSHOT */}
       <View style={styles.snapshotRow}>
@@ -135,13 +160,21 @@ export const WelcomeScreen = ({ navigation }) => (
 
       <Text style={styles.footerNote}>BorderEye — Prototype / Research Project</Text>
     </View>
-  </ScrollView>
-);
+  </Animated.ScrollView>
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  gridLayer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: HERO_HEIGHT + 80,
   },
   scrollContent: {
     alignItems: 'center',
@@ -172,14 +205,14 @@ const styles = StyleSheet.create({
     marginRight: 6,
   },
   statusPillText: {
-    ...typography.metadata,
-    fontWeight: '700',
+    fontFamily: fontFamily.monoBold,
+    fontSize: 12,
     letterSpacing: 0.4,
     color: colors.textSecondary,
   },
   wordmark: {
+    fontFamily: fontFamily.displayBold,
     fontSize: 42,
-    fontWeight: '800',
     letterSpacing: -1,
     color: colors.text,
     marginBottom: 2,
@@ -211,14 +244,14 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   snapshotValue: {
+    fontFamily: fontFamily.displayBold,
     fontSize: 24,
-    fontWeight: '800',
     color: colors.text,
     letterSpacing: -0.5,
   },
   snapshotLabel: {
-    ...typography.metadata,
-    fontWeight: '700',
+    fontFamily: fontFamily.monoBold,
+    fontSize: 12,
     letterSpacing: 0.6,
     color: colors.textDim,
     marginTop: 2,

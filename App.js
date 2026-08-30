@@ -2,9 +2,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { useFonts } from 'expo-font';
 import { StatusBar } from 'expo-status-bar';
+import { View } from 'react-native';
 import { RobotProvider } from './src/context/RobotContext';
 import { colors } from './src/utils/colors';
+import { FONT_MAP } from './src/utils/fonts';
 
 // Screens
 import { AlertsScreen } from './src/screens/AlertsScreen';
@@ -85,6 +88,14 @@ function SplashRoute({ navigation }) {
 }
 
 export default function App() {
+  const [fontsLoaded] = useFonts(FONT_MAP);
+
+  // Keep the native splash (see app.json, same #2C2C2C) on screen until the
+  // custom fonts are ready, instead of flashing system-font text first.
+  if (!fontsLoaded) {
+    return <View style={{ flex: 1, backgroundColor: colors.surfaceDark }} />;
+  }
+
   return (
     <RobotProvider>
       <NavigationContainer>

@@ -2,7 +2,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { MotiView } from 'moti';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { colors, radius, shadow, spacing, typography } from '../utils/theme';
+import { colors, fontFamily, radius, shadow, spacing, typography } from '../utils/theme';
 
 // The four sensing layers actually wired into the firmware + DataParser
 // (see README "Hardware Components" and DataParser.parseSerialData).
@@ -118,8 +118,8 @@ const styles = StyleSheet.create({
     marginBottom: spacing.sm,
   },
   indexLabel: {
-    ...typography.metadata,
-    fontWeight: '700',
+    fontFamily: fontFamily.monoBold,
+    fontSize: 12,
     color: colors.textDim,
   },
   iconBadge: {

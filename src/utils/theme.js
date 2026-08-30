@@ -92,18 +92,37 @@ export const radius = {
   pill: 999,
 };
 
+// Loaded via useFonts() in App.js (see src/utils/fonts.js) — must match
+// the exact @expo-google-fonts export keys. Falls back to the platform
+// default automatically until fonts finish loading (no layout jump: the
+// app is held on SplashScreen until loadFonts() resolves).
+export const fontFamily = {
+  displayBold: 'SpaceGrotesk_700Bold',
+  displaySemiBold: 'SpaceGrotesk_600SemiBold',
+  displayMedium: 'SpaceGrotesk_500Medium',
+  monoRegular: 'JetBrainsMono_400Regular',
+  monoMedium: 'JetBrainsMono_500Medium',
+  monoBold: 'JetBrainsMono_700Bold',
+};
+
 // Font sizing/weight scale. Color is applied by the caller (usually
 // colors.text or colors.textSecondary) so these stay theme-neutral.
+// Display (Space Grotesk) carries headings/titles; mono (JetBrains Mono)
+// carries technical labels, metrics, and timestamps — body copy stays on
+// the system font for paragraph readability. fontWeight is omitted where
+// a specific weight's font file is already loaded, since pairing a named
+// weight file with a conflicting fontWeight can make RN synthesize a
+// second bold pass or silently ignore the custom face.
 export const typography = {
-  screenTitle: { fontSize: 26, fontWeight: '700', letterSpacing: 0.1 },
-  sectionTitle: { fontSize: 13, fontWeight: '700', letterSpacing: 0.8, textTransform: 'uppercase' },
-  cardTitle: { fontSize: 15, fontWeight: '600', letterSpacing: 0.1 },
-  metric: { fontSize: 30, fontWeight: '700', letterSpacing: -0.3 },
-  metricLarge: { fontSize: 40, fontWeight: '700', letterSpacing: -0.5 },
+  screenTitle: { fontFamily: fontFamily.displayBold, fontSize: 26, letterSpacing: 0.1 },
+  sectionTitle: { fontFamily: fontFamily.monoBold, fontSize: 12, letterSpacing: 0.8, textTransform: 'uppercase' },
+  cardTitle: { fontFamily: fontFamily.displaySemiBold, fontSize: 15, letterSpacing: 0.1 },
+  metric: { fontFamily: fontFamily.monoBold, fontSize: 30, letterSpacing: -0.3 },
+  metricLarge: { fontFamily: fontFamily.monoBold, fontSize: 40, letterSpacing: -0.5 },
   body: { fontSize: 14, fontWeight: '400', lineHeight: 20 },
-  label: { fontSize: 12, fontWeight: '600', letterSpacing: 0.2 },
-  metadata: { fontSize: 12, fontWeight: '400' },
-  timestamp: { fontSize: 11, fontWeight: '400' },
+  label: { fontFamily: fontFamily.monoMedium, fontSize: 12, letterSpacing: 0.2 },
+  metadata: { fontFamily: fontFamily.monoRegular, fontSize: 12 },
+  timestamp: { fontFamily: fontFamily.monoRegular, fontSize: 11 },
 };
 
 export const shadow = {
