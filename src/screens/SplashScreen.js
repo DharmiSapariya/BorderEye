@@ -1,8 +1,8 @@
-import { Feather } from '@expo/vector-icons';
 import { AnimatePresence, MotiView } from 'moti';
 import { useEffect, useState } from 'react';
 import { AccessibilityInfo, Dimensions, StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, Defs, LinearGradient, Path, Stop } from 'react-native-svg';
+import { Logo } from '../components/Logo';
 import { TechnicalGrid } from '../components/TechnicalGrid';
 import { colors, spacing, typography } from '../utils/theme';
 
@@ -46,7 +46,7 @@ const ScanRing = ({ reduceMotion }) => (
     <Svg width={RING_SIZE} height={RING_SIZE} viewBox={`0 0 ${RING_SIZE} ${RING_SIZE}`} style={StyleSheet.absoluteFill}>
       <Circle cx={RING_SIZE / 2} cy={RING_SIZE / 2} r={RING_SIZE / 2 - 1} stroke={colors.borderOnDark} strokeWidth={1} fill="none" />
     </Svg>
-    <Feather name="shield" size={22} color={colors.textOnDark} />
+    <Logo size={30} ring={colors.textOnDark} aperture={colors.textOnDark} blip={colors.accent} />
   </View>
 );
 

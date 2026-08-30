@@ -2,6 +2,7 @@ import { Feather, Ionicons } from '@expo/vector-icons';
 import { MotiView } from 'moti';
 import { useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
+import { Logo } from '../components/Logo';
 import { PressScale } from '../components/PressScale';
 import { useRobot } from '../context/RobotContext';
 import WiFiService from '../services/WiFiService';
@@ -77,7 +78,7 @@ export const ConnectionScreen = ({ navigation }) => {
         <View style={styles.headerInner}>
           <View style={styles.brandRow}>
             <View style={styles.brandIconWrap}>
-              <Ionicons name="shield-checkmark" size={24} color={colors.textOnDark} />
+              <Logo size={24} ring={colors.textOnDark} aperture={colors.textOnDark} blip={colors.accent} />
             </View>
             <View>
               <Text style={styles.title}>BorderEye Monitor</Text>
