@@ -1,11 +1,13 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
+import { LinearGradient } from 'expo-linear-gradient';
 import { MotiView } from 'moti';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { AnimatedNumber } from './AnimatedNumber';
+import { Sparkline } from './Sparkline';
 import { blur, colors, motion, radius, shadow, spacing, typography } from '../utils/theme';
 
-export const SensorCard = ({ title, value, decimals = 0, unit, icon, accent = colors.primary, status, index = 0, onPress }) => {
+export const SensorCard = ({ title, value, decimals = 0, unit, icon, accent = colors.primary, status, history, index = 0, onPress }) => {
   const isNumeric = typeof value === 'number' && !Number.isNaN(value);
   const content = ({ pressed } = {}) => (
     <MotiView
@@ -14,11 +16,20 @@ export const SensorCard = ({ title, value, decimals = 0, unit, icon, accent = co
       animate={{ opacity: 1, translateY: 0, scale: pressed ? 0.97 : 1 }}
       transition={{ type: 'timing', duration: motion.normal, delay: index * motion.stagger }}
     >
+      <LinearGradient
+        colors={['transparent', accent, 'transparent']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={styles.accentBar}
+      />
       <BlurView intensity={blur.subtle} tint={blur.tint} style={StyleSheet.absoluteFill} />
       <View style={styles.tint} pointerEvents="none" />
       <View style={styles.content}>
-        <View style={[styles.iconBadge, { backgroundColor: accent + '1F', borderColor: accent + '38' }]}>
-          <MaterialCommunityIcons name={icon} size={18} color={accent} />
+        <View style={styles.topRow}>
+          <View style={[styles.iconBadge, { backgroundColor: accent + '1F', borderColor: accent + '38' }]}>
+            <MaterialCommunityIcons name={icon} size={18} color={accent} />
+          </View>
+          {history && history.length > 1 && <Sparkline data={history} color={accent} />}
         </View>
         <Text style={styles.title}>{title}</Text>
         <View style={styles.valueRow}>
@@ -39,13 +50,11 @@ export const SensorCard = ({ title, value, decimals = 0, unit, icon, accent = co
     </MotiView>
   );
 
-  if (!onPress) return <View style={styles.grid}>{content({})}</View>;
-
   return (
     <Pressable
       onPress={onPress}
       style={styles.grid}
-      accessibilityRole="button"
+      accessibilityRole={onPress ? 'button' : undefined}
       accessibilityLabel={`${title}: ${value ?? 'no reading'} ${unit || ''}${status ? `, ${status.text}` : ''}`}
     >
       {content}
@@ -70,6 +79,13 @@ const styles = StyleSheet.create({
   pressed: {
     borderColor: colors.borderStrong,
   },
+  accentBar: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 2,
+  },
   tint: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: colors.surfaceGlass,
@@ -79,6 +95,12 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'space-between',
   },
+  topRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    marginBottom: spacing.sm,
+  },
   iconBadge: {
     width: 34,
     height: 34,
@@ -86,7 +108,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: spacing.sm,
   },
   title: {
     ...typography.label,

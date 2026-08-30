@@ -11,7 +11,16 @@ import { colors, layout, radius, spacing, typography } from '../utils/theme';
 import { THRESHOLDS } from '../utils/constants';
 
 export const DashboardScreen = ({ navigation }) => {
-  const { sensorData, robotState, connectedDevice, stats, uptime, alerts } = useRobot();
+  const { sensorData, dataHistory, robotState, connectedDevice, stats, uptime, alerts } = useRobot();
+
+  // Oldest -> newest, last 12 readings, for the sparkline on each sensor
+  // card (dataHistory itself is newest-first).
+  const sparkline = (field) =>
+    dataHistory
+      .slice(0, 12)
+      .map((d) => d[field])
+      .filter((v) => typeof v === 'number')
+      .reverse();
 
   const getGasStatus = (gasValue) => {
     if (!gasValue) return null;
@@ -103,6 +112,7 @@ export const DashboardScreen = ({ navigation }) => {
                 unit="°C"
                 icon="thermometer"
                 accent={colors.temperature}
+                history={sparkline('temperature')}
               />
               <SensorCard
                 index={1}
@@ -112,6 +122,7 @@ export const DashboardScreen = ({ navigation }) => {
                 unit="%"
                 icon="water-percent"
                 accent={colors.humidity}
+                history={sparkline('humidity')}
               />
               <SensorCard
                 index={2}
@@ -121,6 +132,7 @@ export const DashboardScreen = ({ navigation }) => {
                 icon="weather-windy"
                 accent={colors.gas}
                 status={getGasStatus(sensorData?.gas)}
+                history={sparkline('gas')}
               />
               <SensorCard
                 index={3}
@@ -130,6 +142,7 @@ export const DashboardScreen = ({ navigation }) => {
                 icon="radar"
                 accent={colors.distance}
                 status={getDistanceStatus(sensorData?.distance)}
+                history={sparkline('distance')}
               />
               <SensorCard
                 index={4}
