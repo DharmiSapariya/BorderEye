@@ -376,7 +376,7 @@ Border Eye demonstrates that advanced, affordable sensor technologies can be com
 
 ## Author
 
-**Dharmi Sapariya**
+**Dharmi Sapariya** and **Jasmine**
 
 ---
 
