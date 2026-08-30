@@ -12,6 +12,8 @@ import { AnalyticsScreen } from './src/screens/AnalyticsScreen';
 import { ConnectionScreen } from './src/screens/ConnectionScreen';
 import { DashboardScreen } from './src/screens/DashboardScreen';
 import { SettingsScreen } from './src/screens/SettingsScreen';
+import { SplashScreen } from './src/screens/SplashScreen';
+import { WelcomeScreen } from './src/screens/WelcomeScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -25,7 +27,7 @@ function MainTabs() {
         tabBarStyle: {
           backgroundColor: colors.backgroundLight,
           borderTopWidth: 1,
-          borderTopColor: 'rgba(255,255,255,0.08)',
+          borderTopColor: colors.border,
           paddingBottom: 6,
           paddingTop: 8,
           height: 64,
@@ -78,17 +80,23 @@ function MainTabs() {
   );
 }
 
+function SplashRoute({ navigation }) {
+  return <SplashScreen onDone={() => navigation.replace('Welcome')} />;
+}
+
 export default function App() {
   return (
     <RobotProvider>
       <NavigationContainer>
-        <StatusBar style="light" />
+        <StatusBar style="dark" />
         <Stack.Navigator
           screenOptions={{
             headerShown: false,
             contentStyle: { backgroundColor: colors.background },
           }}
         >
+          <Stack.Screen name="Splash" component={SplashRoute} />
+          <Stack.Screen name="Welcome" component={WelcomeScreen} />
           <Stack.Screen name="Connection" component={ConnectionScreen} />
           <Stack.Screen name="Main" component={MainTabs} />
         </Stack.Navigator>
