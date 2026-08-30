@@ -1,37 +1,49 @@
-import { Ionicons } from '@expo/vector-icons';
+import { Feather } from '@expo/vector-icons';
 import { Dimensions, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
+import { EmptyState } from '../components/EmptyState';
 import { useRobot } from '../context/RobotContext';
-import { colors } from '../utils/colors';
+import { colors, layout, radius, shadow, spacing, typography } from '../utils/theme';
 
 const SectionTitle = ({ icon, children }) => (
   <View style={styles.sectionTitleRow}>
-    <Ionicons name={icon} size={17} color={colors.primary} style={styles.sectionTitleIcon} />
+    <Feather name={icon} size={14} color={colors.primary} style={styles.sectionTitleIcon} />
     <Text style={styles.sectionTitle}>{children}</Text>
   </View>
 );
+
+// rgba(...) builders so react-native-chart-kit (which needs a color function,
+// not a static value) still draws in the theme's muted sensor accents.
+const rgbaFromHex = (hex) => {
+  const n = parseInt(hex.replace('#', ''), 16);
+  return `${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}`;
+};
+
+const baseChartConfig = {
+  backgroundGradientFrom: colors.surface,
+  backgroundGradientTo: colors.surface,
+  strokeWidth: 2,
+  barPercentage: 0.5,
+  useShadowColorFromDataset: false,
+  decimalPlaces: 1,
+  labelColor: (opacity = 1) => `rgba(${rgbaFromHex(colors.textDim)}, ${opacity})`,
+};
+
+const chartColorConfig = (hex) => ({
+  ...baseChartConfig,
+  color: (opacity = 1) => `rgba(${rgbaFromHex(hex)}, ${opacity})`,
+});
 
 const screenWidth = Dimensions.get('window').width;
 
 export const AnalyticsScreen = () => {
   const { dataHistory, stats } = useRobot();
 
-  // Prepare chart data (last 20 readings)
   const recentData = dataHistory.slice(0, 20).reverse();
-  
+
   const temperatureData = recentData.map(d => d.temperature || 0);
   const gasData = recentData.map(d => d.gas || 0);
   const distanceData = recentData.map(d => d.distance || 0);
-
-  const chartConfig = {
-    backgroundGradientFrom: colors.surface,
-    backgroundGradientTo: colors.surface,
-    color: (opacity = 1) => `rgba(0, 217, 255, ${opacity})`,
-    strokeWidth: 2,
-    barPercentage: 0.5,
-    useShadowColorFromDataset: false,
-    decimalPlaces: 1,
-  };
 
   const calculateAverage = (data) => {
     if (data.length === 0) return 0;
@@ -47,130 +59,123 @@ export const AnalyticsScreen = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Analytics</Text>
-        <Text style={styles.subtitle}>{dataHistory.length} readings recorded</Text>
+        <View style={styles.headerInner}>
+          <Text style={styles.title}>Analytics</Text>
+          <Text style={styles.subtitle}>{dataHistory.length} readings recorded</Text>
+        </View>
       </View>
 
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {recentData.length > 0 ? (
-          <>
-            <View style={styles.section}>
-              <SectionTitle icon="thermometer-outline">Temperature Trend</SectionTitle>
-              <LineChart
-                data={{
-                  labels: [],
-                  datasets: [{ data: temperatureData }],
-                }}
-                width={screenWidth - 64}
-                height={180}
-                chartConfig={chartConfig}
-                bezier
-                style={styles.chart}
-                withDots={false}
-                withInnerLines={false}
-                withOuterLines={true}
-                withVerticalLabels={true}
-                withHorizontalLabels={true}
-              />
-              <View style={styles.statsRow}>
-                <View style={styles.statItem}>
-                  <Text style={styles.statLabel}>Average</Text>
-                  <Text style={styles.statValue}>{calculateAverage(temperatureData)}°C</Text>
-                </View>
-                <View style={styles.statItem}>
-                  <Text style={styles.statLabel}>Max</Text>
-                  <Text style={styles.statValue}>{calculateMax(temperatureData)}°C</Text>
+      <ScrollView
+        style={styles.content}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.contentInner}>
+          {recentData.length > 0 ? (
+            <>
+              <View style={[styles.section, shadow.sm]}>
+                <SectionTitle icon="thermometer">Temperature Trend</SectionTitle>
+                <LineChart
+                  data={{ labels: [], datasets: [{ data: temperatureData }] }}
+                  width={Math.min(screenWidth, layout.maxContentWidth) - 64}
+                  height={180}
+                  chartConfig={chartColorConfig(colors.temperature)}
+                  bezier
+                  style={styles.chart}
+                  withDots={false}
+                  withInnerLines={false}
+                  withOuterLines
+                  withVerticalLabels
+                  withHorizontalLabels
+                />
+                <View style={styles.statsRow}>
+                  <View style={styles.statItem}>
+                    <Text style={styles.statLabel}>Average</Text>
+                    <Text style={styles.statValue}>{calculateAverage(temperatureData)}°C</Text>
+                  </View>
+                  <View style={styles.statItem}>
+                    <Text style={styles.statLabel}>Max</Text>
+                    <Text style={styles.statValue}>{calculateMax(temperatureData)}°C</Text>
+                  </View>
                 </View>
               </View>
-            </View>
 
-            <View style={styles.section}>
-              <SectionTitle icon="cloud-outline">Gas Levels</SectionTitle>
-              <LineChart
-                data={{
-                  labels: [],
-                  datasets: [{ data: gasData }],
-                }}
-                width={screenWidth - 64}
-                height={180}
-                chartConfig={{
-                  ...chartConfig,
-                  color: (opacity = 1) => `rgba(255, 230, 109, ${opacity})`,
-                }}
-                bezier
-                style={styles.chart}
-                withDots={false}
-                withInnerLines={false}
-                withOuterLines={true}
-              />
-              <View style={styles.statsRow}>
-                <View style={styles.statItem}>
-                  <Text style={styles.statLabel}>Average</Text>
-                  <Text style={styles.statValue}>{calculateAverage(gasData)}</Text>
-                </View>
-                <View style={styles.statItem}>
-                  <Text style={styles.statLabel}>Max</Text>
-                  <Text style={styles.statValue}>{calculateMax(gasData)}</Text>
+              <View style={[styles.section, shadow.sm]}>
+                <SectionTitle icon="wind">Gas Levels</SectionTitle>
+                <LineChart
+                  data={{ labels: [], datasets: [{ data: gasData }] }}
+                  width={Math.min(screenWidth, layout.maxContentWidth) - 64}
+                  height={180}
+                  chartConfig={chartColorConfig(colors.gas)}
+                  bezier
+                  style={styles.chart}
+                  withDots={false}
+                  withInnerLines={false}
+                  withOuterLines
+                />
+                <View style={styles.statsRow}>
+                  <View style={styles.statItem}>
+                    <Text style={styles.statLabel}>Average</Text>
+                    <Text style={styles.statValue}>{calculateAverage(gasData)}</Text>
+                  </View>
+                  <View style={styles.statItem}>
+                    <Text style={styles.statLabel}>Max</Text>
+                    <Text style={styles.statValue}>{calculateMax(gasData)}</Text>
+                  </View>
                 </View>
               </View>
-            </View>
 
-            <View style={styles.section}>
-              <SectionTitle icon="resize-outline">Distance Readings</SectionTitle>
-              <LineChart
-                data={{
-                  labels: [],
-                  datasets: [{ data: distanceData }],
-                }}
-                width={screenWidth - 64}
-                height={180}
-                chartConfig={{
-                  ...chartConfig,
-                  color: (opacity = 1) => `rgba(57, 255, 20, ${opacity})`,
-                }}
-                bezier
-                style={styles.chart}
-                withDots={false}
-                withInnerLines={false}
-                withOuterLines={true}
-              />
-              <View style={styles.statsRow}>
-                <View style={styles.statItem}>
-                  <Text style={styles.statLabel}>Average</Text>
-                  <Text style={styles.statValue}>{calculateAverage(distanceData)} cm</Text>
-                </View>
-                <View style={styles.statItem}>
-                  <Text style={styles.statLabel}>Min</Text>
-                  <Text style={styles.statValue}>{Math.min(...distanceData)} cm</Text>
+              <View style={[styles.section, shadow.sm]}>
+                <SectionTitle icon="radio">Distance Readings</SectionTitle>
+                <LineChart
+                  data={{ labels: [], datasets: [{ data: distanceData }] }}
+                  width={Math.min(screenWidth, layout.maxContentWidth) - 64}
+                  height={180}
+                  chartConfig={chartColorConfig(colors.distance)}
+                  bezier
+                  style={styles.chart}
+                  withDots={false}
+                  withInnerLines={false}
+                  withOuterLines
+                />
+                <View style={styles.statsRow}>
+                  <View style={styles.statItem}>
+                    <Text style={styles.statLabel}>Average</Text>
+                    <Text style={styles.statValue}>{calculateAverage(distanceData)} cm</Text>
+                  </View>
+                  <View style={styles.statItem}>
+                    <Text style={styles.statLabel}>Min</Text>
+                    <Text style={styles.statValue}>{Math.min(...distanceData)} cm</Text>
+                  </View>
                 </View>
               </View>
-            </View>
 
-            <View style={styles.summarySection}>
-              <SectionTitle icon="stats-chart-outline">Summary Statistics</SectionTitle>
-              <View style={styles.summaryGrid}>
-                <View style={styles.summaryCard}>
-                  <Text style={styles.summaryValue}>{stats.totalReadings}</Text>
-                  <Text style={styles.summaryLabel}>Total Readings</Text>
-                </View>
-                <View style={styles.summaryCard}>
-                  <Text style={styles.summaryValue}>{stats.obstaclesAvoided}</Text>
-                  <Text style={styles.summaryLabel}>Obstacles Avoided</Text>
-                </View>
-                <View style={styles.summaryCard}>
-                  <Text style={styles.summaryValue}>{stats.alertsTriggered}</Text>
-                  <Text style={styles.summaryLabel}>Alerts Triggered</Text>
+              <View style={[styles.section, shadow.sm]}>
+                <SectionTitle icon="bar-chart-2">Summary Statistics</SectionTitle>
+                <View style={styles.summaryGrid}>
+                  <View style={styles.summaryCard}>
+                    <Text style={styles.summaryValue}>{stats.totalReadings}</Text>
+                    <Text style={styles.summaryLabel}>Total Readings</Text>
+                  </View>
+                  <View style={styles.summaryCard}>
+                    <Text style={styles.summaryValue}>{stats.obstaclesAvoided}</Text>
+                    <Text style={styles.summaryLabel}>Obstacles Avoided</Text>
+                  </View>
+                  <View style={styles.summaryCard}>
+                    <Text style={styles.summaryValue}>{stats.alertsTriggered}</Text>
+                    <Text style={styles.summaryLabel}>Alerts Triggered</Text>
+                  </View>
                 </View>
               </View>
-            </View>
-          </>
-        ) : (
-          <View style={styles.emptyState}>
-            <Ionicons name="analytics-outline" size={56} color={colors.textDim} style={styles.emptyIcon} />
-            <Text style={styles.emptyText}>No data yet</Text>
-            <Text style={styles.emptySubtext}>Start collecting sensor data to see analytics</Text>
-          </View>
-        )}
+            </>
+          ) : (
+            <EmptyState
+              icon="bar-chart-2"
+              title="No data yet"
+              subtitle="Start collecting sensor data to see analytics"
+            />
+          )}
+        </View>
       </ScrollView>
     </View>
   );
@@ -182,70 +187,78 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   header: {
-    paddingTop: 50,
-    paddingHorizontal: 16,
-    paddingBottom: 16,
+    paddingTop: 56,
+    paddingHorizontal: spacing.xl,
+    paddingBottom: spacing.lg,
     backgroundColor: colors.backgroundLight,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  headerInner: {
+    width: '100%',
+    maxWidth: layout.maxContentWidth,
+    alignSelf: 'center',
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
+    ...typography.screenTitle,
     color: colors.text,
     marginBottom: 4,
   },
   subtitle: {
-    fontSize: 14,
+    ...typography.body,
+    fontSize: 13,
     color: colors.textSecondary,
   },
   content: {
     flex: 1,
   },
+  scrollContent: {
+    alignItems: 'center',
+  },
+  contentInner: {
+    width: '100%',
+    maxWidth: layout.maxContentWidth,
+  },
   section: {
-    margin: 16,
-    padding: 16,
+    margin: spacing.lg,
+    padding: spacing.lg,
     backgroundColor: colors.surface,
-    borderRadius: 12,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   sectionTitleRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: spacing.md,
   },
   sectionTitleIcon: {
-    marginRight: 8,
+    marginRight: spacing.sm,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: '600',
+    ...typography.cardTitle,
     color: colors.text,
   },
   chart: {
-    marginVertical: 8,
-    borderRadius: 8,
+    marginVertical: spacing.sm,
+    borderRadius: radius.sm,
   },
   statsRow: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    marginTop: 12,
+    marginTop: spacing.md,
   },
   statItem: {
     alignItems: 'center',
   },
   statLabel: {
-    fontSize: 12,
+    ...typography.metadata,
     color: colors.textSecondary,
     marginBottom: 4,
   },
   statValue: {
-    fontSize: 18,
-    fontWeight: 'bold',
+    ...typography.cardTitle,
     color: colors.primary,
-  },
-  summarySection: {
-    margin: 16,
-    padding: 16,
-    backgroundColor: colors.surface,
-    borderRadius: 12,
   },
   summaryGrid: {
     flexDirection: 'row',
@@ -256,33 +269,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   summaryValue: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: 22,
+    fontWeight: '700',
     color: colors.success,
     marginBottom: 4,
   },
   summaryLabel: {
-    fontSize: 11,
-    color: colors.textSecondary,
-    textAlign: 'center',
-  },
-  emptyState: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 80,
-  },
-  emptyIcon: {
-    marginBottom: 16,
-  },
-  emptyText: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: colors.text,
-    marginBottom: 8,
-  },
-  emptySubtext: {
-    fontSize: 14,
+    ...typography.metadata,
     color: colors.textSecondary,
     textAlign: 'center',
   },

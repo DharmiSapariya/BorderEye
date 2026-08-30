@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { AlertCard } from '../components/AlertCard';
 import { useRobot } from '../context/RobotContext';
-import { colors } from '../utils/colors';
+import { colors, layout, radius, spacing, typography } from '../utils/theme';
 
 export const AlertsScreen = () => {
   const { alerts } = useRobot();
@@ -14,6 +14,7 @@ export const AlertsScreen = () => {
     { id: 'gas', label: 'Gas', icon: 'cloud-outline' },
     { id: 'metal', label: 'Metal', icon: 'magnet-outline' },
     { id: 'obstacle', label: 'Obstacle', icon: 'warning-outline' },
+    { id: 'temperature', label: 'Temperature', icon: 'thermometer-outline' },
   ];
 
   const filteredAlerts = filter === 'all'
@@ -27,11 +28,14 @@ export const AlertsScreen = () => {
         filter === item.id && styles.filterButtonActive
       ]}
       onPress={() => setFilter(item.id)}
+      accessibilityRole="button"
+      accessibilityLabel={`Filter: ${item.label}`}
+      accessibilityState={{ selected: filter === item.id }}
     >
       <Ionicons
         name={item.icon}
-        size={15}
-        color={filter === item.id ? colors.text : colors.textSecondary}
+        size={14}
+        color={filter === item.id ? colors.textOnDark : colors.textSecondary}
         style={styles.filterIcon}
       />
       <Text style={[
@@ -46,8 +50,10 @@ export const AlertsScreen = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Alerts & Logs</Text>
-        <Text style={styles.subtitle}>{filteredAlerts.length} total alerts</Text>
+        <View style={styles.headerInner}>
+          <Text style={styles.title}>Alerts & Logs</Text>
+          <Text style={styles.subtitle}>{filteredAlerts.length} total alerts</Text>
+        </View>
       </View>
 
       <View style={styles.filters}>
@@ -71,11 +77,13 @@ export const AlertsScreen = () => {
         />
       ) : (
         <View style={styles.emptyState}>
-          <Ionicons name="checkmark-circle-outline" size={56} color={colors.success} style={styles.emptyIcon} />
+          <View style={styles.emptyIconWrap}>
+            <Ionicons name="checkmark-circle-outline" size={40} color={colors.success} />
+          </View>
           <Text style={styles.emptyText}>No alerts</Text>
           <Text style={styles.emptySubtext}>
-            {filter === 'all' 
-              ? 'Your robot is operating normally'
+            {filter === 'all'
+              ? 'The unit is operating within normal thresholds'
               : `No ${filter} alerts recorded`}
           </Text>
         </View>
@@ -90,74 +98,88 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   header: {
-    paddingTop: 50,
-    paddingHorizontal: 16,
-    paddingBottom: 16,
+    paddingTop: 56,
+    paddingHorizontal: spacing.xl,
+    paddingBottom: spacing.lg,
     backgroundColor: colors.backgroundLight,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  headerInner: {
+    width: '100%',
+    maxWidth: layout.maxContentWidth,
+    alignSelf: 'center',
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
+    ...typography.screenTitle,
     color: colors.text,
     marginBottom: 4,
   },
   subtitle: {
-    fontSize: 14,
+    ...typography.body,
+    fontSize: 13,
     color: colors.textSecondary,
   },
   filters: {
-    paddingVertical: 12,
+    paddingVertical: spacing.md,
     backgroundColor: colors.backgroundLight,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.1)',
+    borderBottomColor: colors.border,
   },
   filtersList: {
-    paddingHorizontal: 16,
+    paddingHorizontal: spacing.xl,
   },
   filterButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    marginRight: 8,
-    borderRadius: 20,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    marginRight: spacing.sm,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: colors.border,
     backgroundColor: colors.surface,
   },
   filterButtonActive: {
     backgroundColor: colors.primary,
+    borderColor: colors.primary,
   },
   filterIcon: {
     marginRight: 6,
   },
   filterText: {
-    fontSize: 14,
+    ...typography.label,
     color: colors.textSecondary,
-    fontWeight: '500',
   },
   filterTextActive: {
-    color: colors.text,
-    fontWeight: '600',
+    color: colors.textOnDark,
   },
   list: {
-    paddingVertical: 12,
+    paddingVertical: spacing.md,
   },
   emptyState: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 32,
+    paddingHorizontal: spacing.xxl,
   },
-  emptyIcon: {
-    marginBottom: 16,
+  emptyIconWrap: {
+    width: 72,
+    height: 72,
+    borderRadius: radius.pill,
+    backgroundColor: colors.successTint,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.lg,
   },
   emptyText: {
-    fontSize: 20,
-    fontWeight: '600',
+    ...typography.cardTitle,
+    fontSize: 18,
     color: colors.text,
-    marginBottom: 8,
+    marginBottom: spacing.sm,
   },
   emptySubtext: {
-    fontSize: 14,
+    ...typography.body,
     color: colors.textSecondary,
     textAlign: 'center',
   },

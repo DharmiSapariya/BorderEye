@@ -1,11 +1,10 @@
-import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
+import { Feather, Ionicons } from '@expo/vector-icons';
 import { MotiView } from 'moti';
 import { useState } from 'react';
 import { ActivityIndicator, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useRobot } from '../context/RobotContext';
 import WiFiService from '../services/WiFiService';
-import { colors } from '../utils/colors';
+import { colors, layout, radius, shadow, spacing, typography } from '../utils/theme';
 
 export const ConnectionScreen = ({ navigation }) => {
   const { connect } = useRobot();
@@ -16,7 +15,7 @@ export const ConnectionScreen = ({ navigation }) => {
   const handleScan = async () => {
     setScanning(true);
     try {
-      const foundDevices = await WiFiService.scanDevices(); // Changed from BluetoothService
+      const foundDevices = await WiFiService.scanDevices();
       setDevices(foundDevices);
     } catch (error) {
       console.error('Scan failed:', error);
@@ -44,9 +43,11 @@ export const ConnectionScreen = ({ navigation }) => {
       transition={{ type: 'timing', duration: 300, delay: index * 60 }}
     >
       <TouchableOpacity
-        style={styles.deviceCard}
+        style={[styles.deviceCard, shadow.sm]}
         onPress={() => handleConnect(item)}
         disabled={connecting}
+        accessibilityRole="button"
+        accessibilityLabel={`Connect to ${item.name}`}
       >
         <View style={styles.deviceIconWrap}>
           <Ionicons name="hardware-chip-outline" size={20} color={colors.primary} />
@@ -54,195 +55,233 @@ export const ConnectionScreen = ({ navigation }) => {
         <View style={styles.deviceInfo}>
           <Text style={styles.deviceName}>{item.name}</Text>
           <Text style={styles.deviceAddress}>{item.address}</Text>
+          {item.isReal === false && (
+            <View style={styles.demoTag}>
+              <Text style={styles.demoTagText}>SIMULATED DATA</Text>
+            </View>
+          )}
         </View>
-        <Ionicons name="chevron-forward" size={20} color={colors.primary} />
+        <Ionicons name="chevron-forward" size={20} color={colors.textDim} />
       </TouchableOpacity>
     </MotiView>
   );
 
   return (
-    <LinearGradient
-      colors={[colors.background, colors.backgroundLight]}
-      style={styles.container}
-    >
+    <View style={styles.container}>
       <MotiView
         style={styles.header}
         from={{ opacity: 0, translateY: -8 }}
         animate={{ opacity: 1, translateY: 0 }}
         transition={{ type: 'timing', duration: 350 }}
       >
-        <View style={styles.brandRow}>
-          <View style={styles.brandIconWrap}>
-            <Ionicons name="shield-checkmark" size={26} color={colors.primary} />
+        <View style={styles.headerInner}>
+          <View style={styles.brandRow}>
+            <View style={styles.brandIconWrap}>
+              <Ionicons name="shield-checkmark" size={24} color={colors.textOnDark} />
+            </View>
+            <View>
+              <Text style={styles.title}>BorderEye Monitor</Text>
+              <Text style={styles.subtitle}>Connect to your unit</Text>
+            </View>
           </View>
-          <Text style={styles.title}>BorderEye Monitor</Text>
         </View>
-        <Text style={styles.subtitle}>Connect to your robot</Text>
       </MotiView>
 
       <View style={styles.content}>
-        <TouchableOpacity
-          style={[styles.scanButton, scanning && styles.scanButtonDisabled]}
-          onPress={handleScan}
-          disabled={scanning || connecting}
-        >
-          <LinearGradient
-            colors={colors.gradients.primary}
-            style={styles.buttonGradient}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
+        <View style={styles.contentInner}>
+          <TouchableOpacity
+            style={[styles.scanButton, scanning && styles.scanButtonDisabled]}
+            onPress={handleScan}
+            disabled={scanning || connecting}
+            accessibilityRole="button"
+            accessibilityLabel={devices.length > 0 ? 'Scan again' : 'Scan for devices'}
           >
             {scanning ? (
-              <ActivityIndicator color="#FFFFFF" />
+              <ActivityIndicator color={colors.textOnDark} />
             ) : (
-              <Text style={styles.scanButtonText}>
-                {devices.length > 0 ? 'Scan Again' : 'Scan for Devices'}
-              </Text>
+              <>
+                <Feather name="wifi" size={16} color={colors.textOnDark} style={{ marginRight: spacing.sm }} />
+                <Text style={styles.scanButtonText}>
+                  {devices.length > 0 ? 'SCAN AGAIN' : 'SCAN FOR DEVICES'}
+                </Text>
+              </>
             )}
-          </LinearGradient>
-        </TouchableOpacity>
+          </TouchableOpacity>
 
-        {connecting && (
-          <View style={styles.connectingContainer}>
-            <ActivityIndicator size="large" color={colors.primary} />
-            <Text style={styles.connectingText}>Connecting...</Text>
-          </View>
-        )}
-
-        {devices.length > 0 && !connecting && (
-          <View style={styles.deviceList}>
-            <Text style={styles.listTitle}>Available Devices</Text>
-            <FlatList
-              data={devices}
-              renderItem={renderDevice}
-              keyExtractor={(item) => item.id}
-              style={styles.list}
-            />
-          </View>
-        )}
-
-        {devices.length === 0 && !scanning && (
-          <MotiView
-            style={styles.emptyState}
-            from={{ opacity: 0, scale: 0.94 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ type: 'timing', duration: 400 }}
-          >
-            <View style={styles.emptyIconWrap}>
-              <Ionicons name="wifi-outline" size={40} color={colors.textDim} />
+          {connecting && (
+            <View style={styles.connectingContainer}>
+              <ActivityIndicator size="large" color={colors.primary} />
+              <Text style={styles.connectingText}>Connecting…</Text>
             </View>
-            <Text style={styles.emptyText}>No bridge server found</Text>
-            <Text style={styles.emptySubtext}>Make sure bridge server is running on your computer and both devices are on same WiFi</Text>
-          </MotiView>
-        )}
+          )}
+
+          {devices.length > 0 && !connecting && (
+            <View style={styles.deviceList}>
+              <Text style={styles.listTitle}>AVAILABLE DEVICES</Text>
+              <FlatList
+                data={devices}
+                renderItem={renderDevice}
+                keyExtractor={(item) => item.id}
+                style={styles.list}
+                showsVerticalScrollIndicator={false}
+              />
+            </View>
+          )}
+
+          {devices.length === 0 && !scanning && (
+            <MotiView
+              style={styles.emptyState}
+              from={{ opacity: 0, scale: 0.94 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ type: 'timing', duration: 400 }}
+            >
+              <View style={styles.emptyIconWrap}>
+                <Ionicons name="wifi-outline" size={36} color={colors.textDim} />
+              </View>
+              <Text style={styles.emptyText}>No bridge server found yet</Text>
+              <Text style={styles.emptySubtext}>
+                Make sure the bridge server is running on your computer and both
+                devices are on the same network. Scanning always finds a device
+                to connect to — a real bridge if reachable, otherwise a
+                simulated one for exploring the app.
+              </Text>
+            </MotiView>
+          )}
+        </View>
       </View>
-    </LinearGradient>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: colors.background,
   },
   header: {
     paddingTop: 60,
-    paddingHorizontal: 24,
-    paddingBottom: 24,
+    paddingHorizontal: spacing.xl,
+    paddingBottom: spacing.xl,
+  },
+  headerInner: {
+    width: '100%',
+    maxWidth: layout.maxContentWidth,
+    alignSelf: 'center',
   },
   brandRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
   },
   brandIconWrap: {
     width: 44,
     height: 44,
-    borderRadius: 14,
-    backgroundColor: colors.primary + '1F',
+    borderRadius: radius.md,
+    backgroundColor: colors.surfaceDark,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 12,
+    marginRight: spacing.md,
   },
   title: {
-    fontSize: 26,
-    fontWeight: 'bold',
+    ...typography.screenTitle,
+    fontSize: 20,
     color: colors.text,
   },
   subtitle: {
-    fontSize: 16,
+    ...typography.body,
+    fontSize: 13,
     color: colors.textSecondary,
   },
   content: {
     flex: 1,
-    paddingHorizontal: 24,
+    alignItems: 'center',
+  },
+  contentInner: {
+    width: '100%',
+    maxWidth: layout.maxContentWidth,
+    flex: 1,
+    paddingHorizontal: spacing.xl,
   },
   scanButton: {
-    borderRadius: 12,
-    overflow: 'hidden',
-    marginBottom: 24,
+    flexDirection: 'row',
+    borderRadius: radius.md,
+    backgroundColor: colors.primary,
+    paddingVertical: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.xxl,
   },
   scanButtonDisabled: {
     opacity: 0.6,
   },
-  buttonGradient: {
-    paddingVertical: 16,
-    alignItems: 'center',
-  },
   scanButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
+    ...typography.label,
+    color: colors.textOnDark,
+    letterSpacing: 0.6,
   },
   connectingContainer: {
     alignItems: 'center',
-    paddingVertical: 32,
+    paddingVertical: spacing.huge,
   },
   connectingText: {
-    marginTop: 12,
-    fontSize: 16,
+    marginTop: spacing.md,
+    ...typography.body,
     color: colors.textSecondary,
   },
   deviceList: {
     flex: 1,
   },
   listTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: colors.text,
-    marginBottom: 12,
+    ...typography.sectionTitle,
+    color: colors.textDim,
+    marginBottom: spacing.md,
   },
   list: {
     flex: 1,
   },
   deviceCard: {
     backgroundColor: colors.surface,
-    padding: 16,
-    borderRadius: 14,
-    marginBottom: 12,
+    padding: spacing.lg,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.border,
+    marginBottom: spacing.md,
     flexDirection: 'row',
     alignItems: 'center',
   },
   deviceIconWrap: {
     width: 38,
     height: 38,
-    borderRadius: 10,
-    backgroundColor: colors.primary + '1F',
+    borderRadius: radius.sm,
+    backgroundColor: colors.primaryTint,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 12,
+    marginRight: spacing.md,
   },
   deviceInfo: {
     flex: 1,
   },
   deviceName: {
-    fontSize: 16,
-    fontWeight: '600',
+    ...typography.cardTitle,
     color: colors.text,
-    marginBottom: 4,
+    marginBottom: 2,
   },
   deviceAddress: {
-    fontSize: 14,
+    ...typography.metadata,
     color: colors.textSecondary,
+  },
+  demoTag: {
+    alignSelf: 'flex-start',
+    backgroundColor: colors.accentTint,
+    borderRadius: radius.sm,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 2,
+    marginTop: spacing.xs,
+  },
+  demoTagText: {
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 0.4,
+    color: colors.primaryDeep,
   },
   emptyState: {
     flex: 1,
@@ -250,24 +289,25 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   emptyIconWrap: {
-    width: 84,
-    height: 84,
-    borderRadius: 42,
+    width: 76,
+    height: 76,
+    borderRadius: radius.pill,
     backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 20,
+    marginBottom: spacing.lg,
   },
   emptyText: {
-    fontSize: 18,
-    fontWeight: '600',
+    ...typography.cardTitle,
     color: colors.text,
-    marginBottom: 8,
+    marginBottom: spacing.sm,
   },
   emptySubtext: {
-    fontSize: 14,
+    ...typography.body,
     color: colors.textSecondary,
     textAlign: 'center',
-    paddingHorizontal: 32,
+    paddingHorizontal: spacing.lg,
   },
 });
