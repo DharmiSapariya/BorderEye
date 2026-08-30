@@ -8,13 +8,17 @@ import { ROBOT_STATES } from '../utils/constants';
 import { blur, colors, radius, shadow, spacing, typography } from '../utils/theme';
 import { StatusIndicator } from './StatusIndicator';
 
+// The hero panel stays a fixed dark technical duotone regardless of robot
+// state (see colors.gradients.hero) — state is communicated by the icon
+// badge color and StatusIndicator label instead, so this card never flips
+// into a full-bleed red/amber/green "alarm" screen.
 const STATE_META = {
-  [ROBOT_STATES.HAZARD_ALERT]: { icon: 'alert-triangle', gradient: colors.gradients.danger, label: 'Hazard' },
-  [ROBOT_STATES.OBSTACLE_DETECTED]: { icon: 'shield', gradient: colors.gradients.warning, label: 'Obstacle' },
-  [ROBOT_STATES.TURNING]: { icon: 'shield', gradient: colors.gradients.warning, label: 'Maneuvering' },
-  [ROBOT_STATES.EXPLORING]: { icon: 'navigation', gradient: colors.gradients.success, label: 'Active' },
+  [ROBOT_STATES.HAZARD_ALERT]: { icon: 'alert-triangle', label: 'Hazard' },
+  [ROBOT_STATES.OBSTACLE_DETECTED]: { icon: 'shield', label: 'Obstacle' },
+  [ROBOT_STATES.TURNING]: { icon: 'shield', label: 'Maneuvering' },
+  [ROBOT_STATES.EXPLORING]: { icon: 'navigation', label: 'Active' },
 };
-const DEFAULT_META = { icon: 'wifi-off', gradient: colors.gradients.neutral, label: 'Offline' };
+const DEFAULT_META = { icon: 'wifi-off', label: 'Offline' };
 
 // DataParser's status text is prefixed with an emoji for the old plain-text
 // UI; this layer renders its own icon instead, so strip the leading glyph.
@@ -40,8 +44,8 @@ export const RobotStatus = ({ robotState, sensorData, deviceName, uptime }) => {
       transition={{ type: 'timing', duration: 320 }}
     >
       <View style={[styles.card, shadow.lg]}>
-        <LinearGradient colors={meta.gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
-        <BlurView intensity={blur.subtle} tint={blur.tint} style={StyleSheet.absoluteFill} />
+        <LinearGradient colors={colors.gradients.hero} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={StyleSheet.absoluteFill} />
+        <BlurView intensity={blur.subtle} tint={blur.tintOnDark} style={StyleSheet.absoluteFill} />
         <View style={styles.glassTint} pointerEvents="none" />
         <View style={styles.content}>
           <View style={styles.topRow}>
@@ -63,7 +67,7 @@ export const RobotStatus = ({ robotState, sensorData, deviceName, uptime }) => {
             <StatusIndicator color={statusColor} label={meta.label} pulse={robotState === ROBOT_STATES.EXPLORING} />
             {uptime && (
               <View style={styles.uptimeWrap}>
-                <Feather name="clock" size={11} color={colors.textDim} style={{ marginRight: 4 }} />
+                <Feather name="clock" size={11} color={colors.textOnDarkSecondary} style={{ marginRight: 4 }} />
                 <Text style={styles.uptime}>{uptime}</Text>
               </View>
             )}
@@ -85,7 +89,7 @@ const styles = StyleSheet.create({
   },
   glassTint: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(10,14,20,0.38)',
+    backgroundColor: 'rgba(44,44,44,0.35)',
   },
   content: {
     padding: spacing.lg,
@@ -98,11 +102,11 @@ const styles = StyleSheet.create({
   },
   eyebrow: {
     ...typography.sectionTitle,
-    color: colors.textSecondary,
+    color: colors.textOnDarkSecondary,
   },
   timestamp: {
     ...typography.timestamp,
-    color: colors.textDim,
+    color: colors.textOnDarkSecondary,
   },
   mainRow: {
     flexDirection: 'row',
@@ -123,13 +127,13 @@ const styles = StyleSheet.create({
   },
   deviceName: {
     ...typography.label,
-    color: colors.textSecondary,
+    color: colors.textOnDarkSecondary,
     marginBottom: 2,
   },
   statusText: {
     ...typography.cardTitle,
     fontSize: 17,
-    color: colors.text,
+    color: colors.textOnDark,
   },
   bottomRow: {
     flexDirection: 'row',
@@ -142,6 +146,6 @@ const styles = StyleSheet.create({
   },
   uptime: {
     ...typography.metadata,
-    color: colors.textDim,
+    color: colors.textOnDarkSecondary,
   },
 });

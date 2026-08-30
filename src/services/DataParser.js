@@ -68,15 +68,17 @@ export class DataParser {
   }
 
   static getStatusColor(state) {
+    // Muted, engineered status palette — matches src/utils/theme.js
+    // (danger/warning/success/textDim) rather than neon dashboard colors.
     switch (state) {
       case ROBOT_STATES.HAZARD_ALERT:
-        return '#FF3838';
+        return '#B33A3A';
       case ROBOT_STATES.OBSTACLE_DETECTED:
-        return '#FFD700';
+        return '#B98A3D';
       case ROBOT_STATES.EXPLORING:
-        return '#39FF14';
+        return '#4B7A5E';
       default:
-        return '#707080';
+        return '#8A9096';
     }
   }
 }

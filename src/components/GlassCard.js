@@ -13,13 +13,14 @@ export const GlassCard = ({
   intensity = blur.subtle,
   noPadding = false,
   onPress,
+  dark = false,
   accessibilityLabel,
   accessibilityRole,
 }) => {
   const inner = (
-    <View style={[styles.wrap, shadow.md, style]}>
-      <BlurView intensity={intensity} tint={blur.tint} style={StyleSheet.absoluteFill} />
-      <View style={styles.overlay} pointerEvents="none" />
+    <View style={[styles.wrap, dark ? styles.wrapDark : styles.wrapLight, shadow.md, style]}>
+      <BlurView intensity={intensity} tint={dark ? blur.tintOnDark : blur.tint} style={StyleSheet.absoluteFill} />
+      <View style={[styles.overlay, dark ? styles.overlayDark : styles.overlayLight]} pointerEvents="none" />
       <View style={!noPadding ? styles.padding : undefined}>{children}</View>
     </View>
   );
@@ -49,11 +50,21 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     overflow: 'hidden',
     borderWidth: 1,
+  },
+  wrapLight: {
     borderColor: colors.border,
+  },
+  wrapDark: {
+    borderColor: colors.borderOnDark,
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
+  },
+  overlayLight: {
     backgroundColor: colors.surfaceGlass,
+  },
+  overlayDark: {
+    backgroundColor: 'rgba(44, 44, 44, 0.55)',
   },
   padding: {
     padding: spacing.lg,

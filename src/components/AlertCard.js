@@ -3,6 +3,7 @@ import { MotiView } from 'moti';
 import { StyleSheet, Text, View } from 'react-native';
 import AlertService from '../services/AlertService';
 import { ALERT_TYPES } from '../utils/constants';
+import { colors, radius, shadow, spacing, typography } from '../utils/theme';
 
 const ALERT_ICONS = {
   [ALERT_TYPES.GAS]: 'cloud-outline',
@@ -24,21 +25,21 @@ export const AlertCard = ({ alert, index = 0 }) => {
 
   return (
     <MotiView
-      style={[styles.card, { borderLeftColor: color }]}
+      style={[styles.card, shadow.sm, { borderLeftColor: color }]}
       from={{ opacity: 0, translateX: 16 }}
       animate={{ opacity: 1, translateX: 0 }}
       transition={{ type: 'timing', duration: 320, delay: Math.min(index, 8) * 50 }}
     >
       <View style={styles.content}>
-        <View style={[styles.iconWrap, { backgroundColor: color + '26' }]}>
+        <View style={[styles.iconWrap, { backgroundColor: color + '1F', borderColor: color + '38' }]}>
           <Ionicons name={icon} size={20} color={color} />
         </View>
         <View style={styles.details}>
           <Text style={styles.message}>{alert.message}</Text>
           <Text style={styles.time}>{formatTime(alert.timestamp)}</Text>
         </View>
-        <View style={[styles.severityBadge, { backgroundColor: color }]}>
-          <Text style={styles.severityText}>{alert.severity}</Text>
+        <View style={[styles.severityBadge, { backgroundColor: color + '1F' }]}>
+          <Text style={[styles.severityText, { color }]}>{alert.severity}</Text>
         </View>
       </View>
     </MotiView>
@@ -48,46 +49,49 @@ export const AlertCard = ({ alert, index = 0 }) => {
 const styles = StyleSheet.create({
   card: {
     marginVertical: 6,
-    marginHorizontal: 16,
-    borderLeftWidth: 4,
-    borderRadius: 12,
-    backgroundColor: '#252541',
+    marginHorizontal: spacing.lg,
+    borderLeftWidth: 3,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
   },
   content: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 12,
+    padding: spacing.md,
   },
   iconWrap: {
     width: 36,
     height: 36,
-    borderRadius: 10,
+    borderRadius: radius.sm,
+    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 12,
+    marginRight: spacing.md,
   },
   details: {
     flex: 1,
   },
   message: {
+    ...typography.cardTitle,
     fontSize: 14,
-    color: '#FFFFFF',
-    fontWeight: '500',
+    color: colors.text,
     marginBottom: 4,
   },
   time: {
-    fontSize: 12,
-    color: '#B0B0C0',
+    ...typography.metadata,
+    color: colors.textSecondary,
   },
   severityBadge: {
-    paddingHorizontal: 8,
+    paddingHorizontal: spacing.sm,
     paddingVertical: 4,
-    borderRadius: 8,
+    borderRadius: radius.sm,
   },
   severityText: {
     fontSize: 10,
-    color: '#FFFFFF',
-    fontWeight: '600',
+    fontWeight: '700',
+    letterSpacing: 0.3,
     textTransform: 'uppercase',
   },
 });

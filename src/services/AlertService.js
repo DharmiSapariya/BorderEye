@@ -141,17 +141,19 @@ class AlertService {
   }
 
   getAlertColor(type) {
+    // Muted, engineered status palette — matches src/utils/theme.js
+    // sensor-identity accents rather than neon dashboard colors.
     switch (type) {
       case ALERT_TYPES.GAS:
-        return '#FFD700';
+        return '#7C6A9C';
       case ALERT_TYPES.METAL:
-        return '#FF8C00';
+        return '#B33A3A';
       case ALERT_TYPES.OBSTACLE:
-        return '#FFD700';
+        return '#B98A3D';
       case ALERT_TYPES.TEMPERATURE:
-        return '#FF6B6B';
+        return '#B9713D';
       default:
-        return '#00D9FF';
+        return '#566167';
     }
   }
 }
